@@ -237,6 +237,7 @@
         return;
       }
 
+      const tokensBeforeSpin = state.tokens;
       state.tokens -= bet;
       const rolled = Math.floor(Math.random() * 37);
       const won = isWin(type, rolled, selectedNumber);
@@ -248,19 +249,23 @@
         const payoutMultiplier = 1 + state.upgrades.payout * 0.1;
         const finalPayout = Math.round(basePayout * payoutMultiplier);
         state.tokens += finalPayout;
-        elements.result.textContent = `Roulette: ${rolled}. You won ${finalPayout - bet} net tokens!`;
-        elements.result.className = "result-win";
       } else {
         state.losses += 1;
         const refund = Math.round(bet * state.upgrades.insurance * 0.1);
         state.tokens += refund;
-        elements.result.textContent = `Roulette: ${rolled}. You lost ${bet - refund} net tokens.`;
-        elements.result.className = "result-loss";
       }
 
       const stipendGain = state.upgrades.stipend * 2;
       if (stipendGain > 0) {
         state.tokens += stipendGain;
+      }
+      const netChange = state.tokens - tokensBeforeSpin;
+      if (won) {
+        elements.result.textContent = `Roulette: ${rolled}. Net gain: +${netChange} tokens.`;
+        elements.result.className = "result-win";
+      } else {
+        elements.result.textContent = `Roulette: ${rolled}. Net change: ${netChange} tokens.`;
+        elements.result.className = "result-loss";
       }
 
       addHistory(`${won ? "Win" : "Loss"} - Bet ${bet} on ${type}, rolled ${rolled}, tokens: ${state.tokens}`);

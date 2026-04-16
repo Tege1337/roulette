@@ -8,7 +8,7 @@ A lightweight browser game where you can:
 
 ## How to play
 
-1. Open `/home/runner/work/roulette/roulette/index.html` in a browser.
+1. Open `index.html` in a browser.
 2. Pick a bet type and amount.
 3. If you choose **Single Number**, enter a number from 0 to 36.
 4. Click **Spin** to play.
