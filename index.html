@@ -67,7 +67,7 @@
     #history {
       list-style: none;
       margin: 0;
-      padding-left: 18px;
+      padding-left: 0;
       max-height: 220px;
       overflow: auto;
     }
@@ -224,8 +224,8 @@
 
     function spinRoulette() {
       const type = elements.betType.value;
-      const bet = Number.parseInt(elements.betAmount.value, 10);
-      const selectedNumber = Number.parseInt(elements.betNumber.value, 10);
+      const bet = parseInt(elements.betAmount.value, 10);
+      const selectedNumber = parseInt(elements.betNumber.value, 10);
 
       if (!Number.isInteger(bet) || bet <= 0) {
         elements.result.textContent = "Enter a valid positive bet amount.";
@@ -251,9 +251,9 @@
 
       if (won) {
         state.wins += 1;
-        const totalReturn = bet * (1 + payoutFor(type));
+        const totalPayout = bet * (1 + payoutFor(type));
         const payoutMultiplier = 1 + state.upgrades.payout * PAYOUT_BOOST_PER_LEVEL;
-        const finalPayout = Math.round(totalReturn * payoutMultiplier);
+        const finalPayout = Math.round(totalPayout * payoutMultiplier);
         state.tokens += finalPayout;
       } else {
         state.losses += 1;
