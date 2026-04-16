@@ -108,19 +108,19 @@
       <div class="upgrade-list">
         <div class="upgrade-item">
           <strong>Payout Boost</strong> (Level <span id="payoutLevel">0</span>)
-          <div>+10% payout per level</div>
+          <div>+<span id="payoutPercentPerLevel">10</span>% payout per level</div>
           <div>Cost: <span id="payoutCost">200</span> tokens</div>
           <button id="buyPayout">Buy</button>
         </div>
         <div class="upgrade-item">
           <strong>Insurance</strong> (Level <span id="insuranceLevel">0</span>)
-          <div>Refund 10% of losing bets per level</div>
+          <div>Refund <span id="insurancePercentPerLevel">10</span>% of losing bets per level</div>
           <div>Cost: <span id="insuranceCost">150</span> tokens</div>
           <button id="buyInsurance">Buy</button>
         </div>
         <div class="upgrade-item">
           <strong>Spin Stipend</strong> (Level <span id="stipendLevel">0</span>)
-          <div>Gain +2 tokens per level after every spin</div>
+          <div>Gain +<span id="stipendTokensPerLevel">2</span> tokens per level after every spin</div>
           <div>Cost: <span id="stipendCost">180</span> tokens</div>
           <button id="buyStipend">Buy</button>
         </div>
@@ -176,6 +176,9 @@
       payoutCost: document.getElementById("payoutCost"),
       insuranceCost: document.getElementById("insuranceCost"),
       stipendCost: document.getElementById("stipendCost"),
+      payoutPercentPerLevel: document.getElementById("payoutPercentPerLevel"),
+      insurancePercentPerLevel: document.getElementById("insurancePercentPerLevel"),
+      stipendTokensPerLevel: document.getElementById("stipendTokensPerLevel"),
       buyPayout: document.getElementById("buyPayout"),
       buyInsurance: document.getElementById("buyInsurance"),
       buyStipend: document.getElementById("buyStipend")
@@ -251,9 +254,10 @@
 
       if (won) {
         state.wins += 1;
-        const totalPayout = bet * (1 + payoutFor(type));
+        const winnings = bet * payoutFor(type);
         const payoutMultiplier = 1 + state.upgrades.payout * PAYOUT_BOOST_PER_LEVEL;
-        const finalPayout = Math.round(totalPayout * payoutMultiplier);
+        const boostedWinnings = Math.round(winnings * payoutMultiplier);
+        const finalPayout = bet + boostedWinnings;
         state.tokens += finalPayout;
       } else {
         state.losses += 1;
@@ -297,6 +301,9 @@
     elements.buyPayout.addEventListener("click", () => buyUpgrade("payout"));
     elements.buyInsurance.addEventListener("click", () => buyUpgrade("insurance"));
     elements.buyStipend.addEventListener("click", () => buyUpgrade("stipend"));
+    elements.payoutPercentPerLevel.textContent = String(Math.round(PAYOUT_BOOST_PER_LEVEL * 100));
+    elements.insurancePercentPerLevel.textContent = String(Math.round(INSURANCE_REFUND_PER_LEVEL * 100));
+    elements.stipendTokensPerLevel.textContent = String(STIPEND_TOKENS_PER_LEVEL);
 
     updateUI();
   </script>
