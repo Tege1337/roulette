@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roulette Simulator</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 16px;
+    }
+    h1, h2 { margin-top: 0; }
+    label { display: block; margin-top: 8px; font-weight: 600; }
+    input, select, button {
+      margin-top: 6px;
+      width: 100%;
+      box-sizing: border-box;
+      background: #0f172a;
+      color: #e2e8f0;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 8px;
+    }
+    button {
+      background: #2563eb;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    button:hover { background: #1d4ed8; }
+    button:disabled {
+      background: #334155;
+      cursor: not-allowed;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      gap: 8px;
+      font-size: 14px;
+    }
+    .result-win { color: #4ade80; }
+    .result-loss { color: #f87171; }
+    .upgrade-list { display: grid; gap: 10px; }
+    .upgrade-item {
+      border: 1px solid #475569;
+      border-radius: 8px;
+      padding: 10px;
+      background: #0b1220;
+    }
+    #history {
+      list-style: none;
+      margin: 0;
+      padding-left: 18px;
+      max-height: 220px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="card">
+      <h1>Roulette Simulator</h1>
+      <div class="stats">
+        <div><strong>Tokens:</strong> <span id="tokens">100</span></div>
+        <div><strong>Total Spins:</strong> <span id="spins">0</span></div>
+        <div><strong>Wins:</strong> <span id="wins">0</span></div>
+        <div><strong>Losses:</strong> <span id="losses">0</span></div>
+      </div>
+
+      <label for="betType">Bet type</label>
+      <select id="betType">
+        <option value="red">Red</option>
+        <option value="black">Black</option>
+        <option value="even">Even</option>
+        <option value="odd">Odd</option>
+        <option value="number">Single Number</option>
+      </select>
+
+      <label for="betAmount">Bet amount</label>
+      <input id="betAmount" type="number" min="1" value="10" />
+
+      <label for="betNumber">Number (0-36)</label>
+      <input id="betNumber" type="number" min="0" max="36" value="0" disabled />
+
+      <button id="spinButton">Spin</button>
+      <p id="result">Place your bet and spin.</p>
+    </section>
+
+    <section class="card">
+      <h2>Upgrades</h2>
+      <div class="upgrade-list">
+        <div class="upgrade-item">
+          <strong>Payout Boost</strong> (Level <span id="payoutLevel">0</span>)
+          <div>+10% payout per level</div>
+          <div>Cost: <span id="payoutCost">200</span> tokens</div>
+          <button id="buyPayout">Buy</button>
+        </div>
+        <div class="upgrade-item">
+          <strong>Insurance</strong> (Level <span id="insuranceLevel">0</span>)
+          <div>Refund 10% of losing bets per level</div>
+          <div>Cost: <span id="insuranceCost">150</span> tokens</div>
+          <button id="buyInsurance">Buy</button>
+        </div>
+        <div class="upgrade-item">
+          <strong>Spin Stipend</strong> (Level <span id="stipendLevel">0</span>)
+          <div>Gain +2 tokens per level after every spin</div>
+          <div>Cost: <span id="stipendCost">180</span> tokens</div>
+          <button id="buyStipend">Buy</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Recent Spins</h2>
+      <ul id="history"></ul>
+    </section>
+  </div>
+
+  <script>
+    const redNumbers = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
+
+    const state = {
+      tokens: 100,
+      spins: 0,
+      wins: 0,
+      losses: 0,
+      upgrades: {
+        payout: 0,
+        insurance: 0,
+        stipend: 0
+      },
+      costs: {
+        payout: 200,
+        insurance: 150,
+        stipend: 180
+      }
+    };
+
+    const elements = {
+      tokens: document.getElementById("tokens"),
+      spins: document.getElementById("spins"),
+      wins: document.getElementById("wins"),
+      losses: document.getElementById("losses"),
+      result: document.getElementById("result"),
+      history: document.getElementById("history"),
+      betType: document.getElementById("betType"),
+      betAmount: document.getElementById("betAmount"),
+      betNumber: document.getElementById("betNumber"),
+      spinButton: document.getElementById("spinButton"),
+      payoutLevel: document.getElementById("payoutLevel"),
+      insuranceLevel: document.getElementById("insuranceLevel"),
+      stipendLevel: document.getElementById("stipendLevel"),
+      payoutCost: document.getElementById("payoutCost"),
+      insuranceCost: document.getElementById("insuranceCost"),
+      stipendCost: document.getElementById("stipendCost"),
+      buyPayout: document.getElementById("buyPayout"),
+      buyInsurance: document.getElementById("buyInsurance"),
+      buyStipend: document.getElementById("buyStipend")
+    };
+
+    function isWin(type, number, selectedNumber) {
+      if (type === "number") return number === selectedNumber;
+      if (number === 0) return false;
+      if (type === "red") return redNumbers.has(number);
+      if (type === "black") return !redNumbers.has(number);
+      if (type === "even") return number % 2 === 0;
+      return number % 2 === 1;
+    }
+
+    function payoutFor(type) {
+      return type === "number" ? 36 : 2;
+    }
+
+    function addHistory(text) {
+      const item = document.createElement("li");
+      item.textContent = text;
+      elements.history.prepend(item);
+      while (elements.history.children.length > 12) {
+        elements.history.removeChild(elements.history.lastChild);
+      }
+    }
+
+    function updateUI() {
+      elements.tokens.textContent = state.tokens;
+      elements.spins.textContent = state.spins;
+      elements.wins.textContent = state.wins;
+      elements.losses.textContent = state.losses;
+
+      elements.payoutLevel.textContent = state.upgrades.payout;
+      elements.insuranceLevel.textContent = state.upgrades.insurance;
+      elements.stipendLevel.textContent = state.upgrades.stipend;
+
+      elements.payoutCost.textContent = state.costs.payout;
+      elements.insuranceCost.textContent = state.costs.insurance;
+      elements.stipendCost.textContent = state.costs.stipend;
+
+      elements.buyPayout.disabled = state.tokens < state.costs.payout;
+      elements.buyInsurance.disabled = state.tokens < state.costs.insurance;
+      elements.buyStipend.disabled = state.tokens < state.costs.stipend;
+    }
+
+    function spinRoulette() {
+      const type = elements.betType.value;
+      const bet = Number.parseInt(elements.betAmount.value, 10);
+      const selectedNumber = Number.parseInt(elements.betNumber.value, 10);
+
+      if (!Number.isInteger(bet) || bet <= 0) {
+        elements.result.textContent = "Enter a valid positive bet amount.";
+        elements.result.className = "result-loss";
+        return;
+      }
+      if (bet > state.tokens) {
+        elements.result.textContent = "Not enough tokens for that bet.";
+        elements.result.className = "result-loss";
+        return;
+      }
+      if (type === "number" && (!Number.isInteger(selectedNumber) || selectedNumber < 0 || selectedNumber > 36)) {
+        elements.result.textContent = "Number bet must be between 0 and 36.";
+        elements.result.className = "result-loss";
+        return;
+      }
+
+      state.tokens -= bet;
+      const rolled = Math.floor(Math.random() * 37);
+      const won = isWin(type, rolled, selectedNumber);
+      state.spins += 1;
+
+      if (won) {
+        state.wins += 1;
+        const basePayout = bet * payoutFor(type);
+        const payoutMultiplier = 1 + state.upgrades.payout * 0.1;
+        const finalPayout = Math.round(basePayout * payoutMultiplier);
+        state.tokens += finalPayout;
+        elements.result.textContent = `Roulette: ${rolled}. You won ${finalPayout - bet} net tokens!`;
+        elements.result.className = "result-win";
+      } else {
+        state.losses += 1;
+        const refund = Math.round(bet * state.upgrades.insurance * 0.1);
+        state.tokens += refund;
+        elements.result.textContent = `Roulette: ${rolled}. You lost ${bet - refund} net tokens.`;
+        elements.result.className = "result-loss";
+      }
+
+      const stipendGain = state.upgrades.stipend * 2;
+      if (stipendGain > 0) {
+        state.tokens += stipendGain;
+      }
+
+      addHistory(`${won ? "Win" : "Loss"} - Bet ${bet} on ${type}, rolled ${rolled}, tokens: ${state.tokens}`);
+      updateUI();
+    }
+
+    function buyUpgrade(type) {
+      const cost = state.costs[type];
+      if (state.tokens < cost) {
+        return;
+      }
+      state.tokens -= cost;
+      state.upgrades[type] += 1;
+      state.costs[type] = Math.round(cost * 1.5);
+      updateUI();
+      addHistory(`Bought ${type} upgrade (level ${state.upgrades[type]}).`);
+    }
+
+    elements.betType.addEventListener("change", () => {
+      elements.betNumber.disabled = elements.betType.value !== "number";
+    });
+    elements.spinButton.addEventListener("click", spinRoulette);
+    elements.buyPayout.addEventListener("click", () => buyUpgrade("payout"));
+    elements.buyInsurance.addEventListener("click", () => buyUpgrade("insurance"));
+    elements.buyStipend.addEventListener("click", () => buyUpgrade("stipend"));
+
+    updateUI();
+  </script>
+</body>
+</html>
