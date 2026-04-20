@@ -4,7 +4,9 @@ const INSURANCE_REFUND_PER_LEVEL = 0.1;
 const STIPEND_TOKENS_PER_LEVEL = 2;
 const UPGRADE_COST_MULTIPLIER = 1.5;
 const MAX_HISTORY_ITEMS = 20;
-const WHEEL_SEQUENCE = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+const SPIN_TRANSITION_MS = 4200;
+const SPIN_SAFETY_BUFFER_MS = 300;
+const EUROPEAN_ROULETTE_SEQUENCE = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 const redNumbers = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
 
 const state = {
@@ -91,9 +93,9 @@ function capitalize(word) {
 
 function buildWheel() {
   elements.wheelTrack.textContent = "";
-  const pocketAngle = 360 / WHEEL_SEQUENCE.length;
+  const pocketAngle = 360 / EUROPEAN_ROULETTE_SEQUENCE.length;
 
-  WHEEL_SEQUENCE.forEach((number, index) => {
+  EUROPEAN_ROULETTE_SEQUENCE.forEach((number, index) => {
     const pocket = document.createElement("div");
     const color = getNumberColor(number);
     pocket.className = `wheel-pocket ${color}`;
@@ -351,8 +353,8 @@ function animateRoll(finalNumber) {
     state.spinning = true;
     setWinningPocket(null);
 
-    const pocketAngle = 360 / WHEEL_SEQUENCE.length;
-    const index = WHEEL_SEQUENCE.indexOf(finalNumber);
+    const pocketAngle = 360 / EUROPEAN_ROULETTE_SEQUENCE.length;
+    const index = EUROPEAN_ROULETTE_SEQUENCE.indexOf(finalNumber);
     const desiredRotation = normalizeAngle(-index * pocketAngle);
     const currentRotation = normalizeAngle(state.wheelRotation);
 
@@ -360,7 +362,7 @@ function animateRoll(finalNumber) {
     if (delta < 0) delta += 360;
 
     state.wheelRotation += 360 * 6 + delta;
-    elements.wheelTrack.style.transition = "transform 4.2s cubic-bezier(0.12, 0.76, 0.16, 1)";
+    elements.wheelTrack.style.transition = `transform ${SPIN_TRANSITION_MS}ms cubic-bezier(0.12, 0.76, 0.16, 1)`;
 
     requestAnimationFrame(() => {
       elements.wheelTrack.style.transform = `rotate(${state.wheelRotation}deg)`;
@@ -379,7 +381,7 @@ function animateRoll(finalNumber) {
       finalize();
     };
 
-    const safetyTimeout = setTimeout(finalize, 4500);
+    const safetyTimeout = setTimeout(finalize, SPIN_TRANSITION_MS + SPIN_SAFETY_BUFFER_MS);
     elements.wheelTrack.addEventListener("transitionend", onTransitionEnd, { once: true });
   });
 }
