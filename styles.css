@@ -126,7 +126,7 @@ button:disabled {
   font-weight: 700;
   border: 1px solid rgba(226, 232, 240, 0.2);
   border-radius: 4px;
-  /* Rotate into position, move to ring radius, then counter-rotate so labels stay upright. */
+  /* Rotate into position, move outward from center with negative Y, then counter-rotate to keep labels upright. */
   transform: rotate(var(--angle)) translateY(calc(-1 * var(--roulette-radius))) rotate(calc(-1 * var(--angle)));
 }
 

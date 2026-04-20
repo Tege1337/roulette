@@ -6,8 +6,17 @@ const UPGRADE_COST_MULTIPLIER = 1.5;
 const MAX_HISTORY_ITEMS = 20;
 const SPIN_TRANSITION_MS = 4200;
 const SPIN_SAFETY_BUFFER_MS = 300;
+const SPIN_FULL_ROTATIONS = 6;
 const EUROPEAN_ROULETTE_SEQUENCE = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 const redNumbers = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
+
+if (
+  EUROPEAN_ROULETTE_SEQUENCE.length !== ROULETTE_POCKETS ||
+  new Set(EUROPEAN_ROULETTE_SEQUENCE).size !== ROULETTE_POCKETS ||
+  EUROPEAN_ROULETTE_SEQUENCE.some((number) => number < 0 || number >= ROULETTE_POCKETS)
+) {
+  throw new Error("Invalid European roulette sequence: expected unique values 0-36.");
+}
 
 const state = {
   tokens: 100,
@@ -361,7 +370,7 @@ function animateRoll(finalNumber) {
     let delta = desiredRotation - currentRotation;
     if (delta < 0) delta += 360;
 
-    state.wheelRotation += 360 * 6 + delta;
+    state.wheelRotation += 360 * SPIN_FULL_ROTATIONS + delta;
     elements.wheelTrack.style.transition = `transform ${SPIN_TRANSITION_MS}ms cubic-bezier(0.12, 0.76, 0.16, 1)`;
 
     requestAnimationFrame(() => {
