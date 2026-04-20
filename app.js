@@ -30,6 +30,7 @@ const state = {
     stipend: 180
   },
   bets: [],
+  betActions: [],
   spinning: false
 };
 
@@ -224,6 +225,7 @@ function addBet(key, label) {
   } else {
     state.bets.push({ key, label, amount: chip });
   }
+  state.betActions.push({ key, amount: chip });
 
   elements.result.textContent = `Placed ${chip} on ${label}.`;
   elements.result.className = "";
@@ -231,12 +233,27 @@ function addBet(key, label) {
 }
 
 function undoBet() {
-  state.bets.pop();
+  const lastAction = state.betActions.pop();
+  if (!lastAction) {
+    return;
+  }
+
+  const existing = state.bets.find((bet) => bet.key === lastAction.key);
+  if (!existing) {
+    updateUI();
+    return;
+  }
+
+  existing.amount -= lastAction.amount;
+  if (existing.amount <= 0) {
+    state.bets = state.bets.filter((bet) => bet.key !== lastAction.key);
+  }
   updateUI();
 }
 
 function clearBets() {
   state.bets = [];
+  state.betActions = [];
   updateUI();
 }
 

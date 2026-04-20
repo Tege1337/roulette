@@ -2,25 +2,27 @@
 
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0f172a;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  background: radial-gradient(circle at top, #172554 0%, #0f172a 45%, #020617 100%);
   color: #e2e8f0;
+  line-height: 1.4;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 24px 20px 28px;
   display: grid;
-  gap: 20px;
+  gap: 18px;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
 .card {
-  background: #1e293b;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
   border: 1px solid #334155;
-  border-radius: 10px;
+  border-radius: 14px;
   padding: 16px;
+  box-shadow: 0 8px 26px rgba(2, 6, 23, 0.35);
 }
 
 h1, h2, h3 {
@@ -41,19 +43,21 @@ button {
   background: #0f172a;
   color: #e2e8f0;
   border: 1px solid #475569;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 8px;
 }
 
 button {
-  background: #2563eb;
+  background: linear-gradient(180deg, #2563eb, #1d4ed8);
   border: none;
   cursor: pointer;
   font-weight: 700;
+  transition: transform 0.14s ease, filter 0.14s ease;
 }
 
 button:hover {
-  background: #1d4ed8;
+  filter: brightness(1.08);
+  transform: translateY(-1px);
 }
 
 button:disabled {
@@ -62,14 +66,15 @@ button:disabled {
 }
 
 .wheel {
-  width: 140px;
-  height: 140px;
+  width: 156px;
+  height: 156px;
   margin: 0 auto 14px;
   border-radius: 50%;
-  border: 4px solid #64748b;
-  background: radial-gradient(circle at 30% 30%, #334155, #0b1220);
+  border: 5px solid #64748b;
+  background: radial-gradient(circle at 30% 30%, #475569, #0b1220);
   display: grid;
   place-items: center;
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.7), 0 12px 32px rgba(2, 6, 23, 0.45);
 }
 
 .wheel-number {
@@ -96,34 +101,37 @@ button:disabled {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(120px, 1fr));
-  gap: 8px;
+  gap: 8px 10px;
   font-size: 14px;
 }
 
 .board-layout {
   margin-top: 10px;
   display: grid;
-  grid-template-columns: 70px 1fr;
+  grid-template-columns: 82px 1fr;
   gap: 8px;
+  align-items: stretch;
 }
 
 .number-board {
   display: grid;
-  grid-template-columns: repeat(12, minmax(35px, 1fr));
+  grid-template-columns: repeat(3, minmax(56px, 1fr));
   gap: 6px;
 }
 
 .outside-board {
   margin-top: 10px;
   display: grid;
-  grid-template-columns: repeat(6, minmax(80px, 1fr));
+  grid-template-columns: repeat(4, minmax(95px, 1fr));
   gap: 6px;
 }
 
 .bet-spot {
   margin-top: 0;
-  padding: 7px 6px;
+  padding: 9px 6px;
   font-size: 13px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  min-height: 42px;
 }
 
 .bet-spot.red {
@@ -139,7 +147,7 @@ button:disabled {
 }
 
 .bet-spot.has-bet {
-  box-shadow: 0 0 0 2px #facc15 inset;
+  box-shadow: 0 0 0 2px #facc15 inset, 0 0 0 1px rgba(250, 204, 21, 0.4);
 }
 
 .bet-actions {
@@ -151,6 +159,10 @@ button:disabled {
 
 #result {
   margin-bottom: 0;
+  min-height: 22px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.35);
 }
 
 .result-win {
@@ -170,7 +182,7 @@ button:disabled {
   border: 1px solid #475569;
   border-radius: 8px;
   padding: 10px;
-  background: #0b1220;
+  background: linear-gradient(180deg, rgba(11, 18, 32, 0.85), rgba(2, 6, 23, 0.95));
 }
 
 #betList,
@@ -187,6 +199,16 @@ button:disabled {
   padding: 6px 8px;
   border: 1px solid #334155;
   border-radius: 6px;
-  background: #0b1220;
+  background: rgba(11, 18, 32, 0.85);
   margin-bottom: 6px;
+}
+
+@media (max-width: 720px) {
+  .outside-board {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+
+  .number-board {
+    grid-template-columns: repeat(3, minmax(44px, 1fr));
+  }
 }
