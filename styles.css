@@ -30,8 +30,9 @@ body {
   margin: 0 auto;
   padding: 24px 20px 30px;
   display: grid;
-  grid-template-columns: 1.2fr 1.1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+  align-items: start;
 }
 
 .card {
@@ -199,12 +200,16 @@ button:disabled {
   margin-top: 10px;
   display: grid;
   gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
 }
 
 .inside-table {
   display: grid;
-  grid-template-columns: 78px 1fr 110px;
+  grid-template-columns: minmax(64px, auto) minmax(0, 1fr) minmax(96px, auto);
   gap: 8px;
+  align-items: stretch;
 }
 
 .zero-spot {
@@ -215,25 +220,29 @@ button:disabled {
 
 .number-board {
   display: grid;
-  grid-template-columns: repeat(3, minmax(60px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
+  grid-auto-rows: minmax(44px, auto);
 }
 
 .column-bets {
   display: grid;
   gap: 6px;
+  grid-auto-rows: minmax(44px, auto);
 }
 
 .dozen-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(100px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
+  grid-auto-rows: minmax(44px, auto);
 }
 
 .outside-row {
   display: grid;
-  grid-template-columns: repeat(6, minmax(100px, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 6px;
+  grid-auto-rows: minmax(44px, auto);
 }
 
 .bet-spot {
@@ -243,6 +252,12 @@ button:disabled {
   border: 1px solid rgba(148, 163, 184, 0.35);
   min-height: 42px;
   background: linear-gradient(180deg, #1e3a8a, #1e40af);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .bet-spot small {
@@ -381,16 +396,16 @@ button:disabled {
   }
 
   .inside-table {
-    grid-template-columns: 68px 1fr;
+    grid-template-columns: minmax(56px, auto) minmax(0, 1fr);
   }
 
   .column-bets {
     grid-column: span 2;
-    grid-template-columns: repeat(3, minmax(90px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .outside-row {
-    grid-template-columns: repeat(3, minmax(100px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -419,5 +434,36 @@ button:disabled {
 
   .history-meta {
     text-align: left;
+  }
+
+  .bet-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 16px 12px 20px;
+    gap: 12px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .inside-table {
+    gap: 6px;
+  }
+
+  .table-wrapper,
+  .dozen-row,
+  .outside-row {
+    gap: 5px;
+  }
+
+  .bet-spot {
+    padding: 8px 5px;
+    font-size: 12px;
+    min-height: 40px;
   }
 }
