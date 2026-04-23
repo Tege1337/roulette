@@ -106,8 +106,8 @@ function buildWheel() {
   const colorStops = [];
 
   EUROPEAN_ROULETTE_SEQUENCE.forEach((number, index) => {
-    const start = (index * pocketAngle).toFixed(4);
-    const end = ((index + 1) * pocketAngle).toFixed(4);
+    const start = index * pocketAngle;
+    const end = (index + 1) * pocketAngle;
     const color = getNumberColor(number);
     const fill = color === "red" ? "#7f1d1d" : color === "black" ? "#020617" : "#14532d";
     colorStops.push(`${fill} ${start}deg ${end}deg`);
