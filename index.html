@@ -8,10 +8,16 @@
 </head>
 <body>
   <div class="container">
-    <section class="card">
+    <section class="card hero-card">
       <h1>Roulette Simulator</h1>
-      <div id="wheel" class="wheel">
-        <div id="wheelNumber" class="wheel-number">0</div>
+      <div class="roulette-stage">
+        <div id="wheel" class="wheel">
+          <div class="wheel-pointer" aria-hidden="true"></div>
+          <div id="wheelTrack" class="wheel-track"></div>
+          <div class="wheel-center">
+            <div id="wheelNumber" class="wheel-number">0</div>
+          </div>
+        </div>
       </div>
       <div class="stats-grid">
         <div><strong>Tokens:</strong> <span id="tokens">100</span></div>
@@ -26,37 +32,49 @@
       <p id="result">Place chips on the board and spin.</p>
     </section>
 
-    <section class="card">
-      <h2>Betting Board</h2>
+    <section class="card table-card">
+      <h2>Betting Table</h2>
       <label for="chipAmount">Chip amount</label>
       <input id="chipAmount" type="number" min="1" value="10" />
-      <div class="board-layout">
-        <button class="bet-spot green" data-bet-key="number:0" data-label="0">0</button>
-        <div id="numberBoard" class="number-board"></div>
+
+      <div class="table-wrapper">
+        <div class="inside-table">
+          <button class="bet-spot green zero-spot" data-bet-key="number:0" data-label="0">0</button>
+          <div id="numberBoard" class="number-board"></div>
+          <div class="column-bets">
+            <button class="bet-spot" data-bet-key="column:1" data-label="Column 1">2 to 1<br><small>Column 1</small></button>
+            <button class="bet-spot" data-bet-key="column:2" data-label="Column 2">2 to 1<br><small>Column 2</small></button>
+            <button class="bet-spot" data-bet-key="column:3" data-label="Column 3">2 to 1<br><small>Column 3</small></button>
+          </div>
+        </div>
+
+        <div class="dozen-row">
+          <button class="bet-spot" data-bet-key="dozen:1" data-label="1st 12">1st 12</button>
+          <button class="bet-spot" data-bet-key="dozen:2" data-label="2nd 12">2nd 12</button>
+          <button class="bet-spot" data-bet-key="dozen:3" data-label="3rd 12">3rd 12</button>
+        </div>
+
+        <div class="outside-row">
+          <button class="bet-spot" data-bet-key="low" data-label="1-18">1-18</button>
+          <button class="bet-spot" data-bet-key="even" data-label="Even">Even</button>
+          <button class="bet-spot red" data-bet-key="red" data-label="Red">Red</button>
+          <button class="bet-spot black" data-bet-key="black" data-label="Black">Black</button>
+          <button class="bet-spot" data-bet-key="odd" data-label="Odd">Odd</button>
+          <button class="bet-spot" data-bet-key="high" data-label="19-36">19-36</button>
+        </div>
       </div>
-      <div class="outside-board">
-        <button class="bet-spot" data-bet-key="dozen:1" data-label="1st 12">1st 12</button>
-        <button class="bet-spot" data-bet-key="dozen:2" data-label="2nd 12">2nd 12</button>
-        <button class="bet-spot" data-bet-key="dozen:3" data-label="3rd 12">3rd 12</button>
-        <button class="bet-spot" data-bet-key="column:1" data-label="Column 1">Column 1</button>
-        <button class="bet-spot" data-bet-key="column:2" data-label="Column 2">Column 2</button>
-        <button class="bet-spot" data-bet-key="column:3" data-label="Column 3">Column 3</button>
-        <button class="bet-spot" data-bet-key="low" data-label="1-18">1-18</button>
-        <button class="bet-spot" data-bet-key="high" data-label="19-36">19-36</button>
-        <button class="bet-spot red" data-bet-key="red" data-label="Red">Red</button>
-        <button class="bet-spot black" data-bet-key="black" data-label="Black">Black</button>
-        <button class="bet-spot" data-bet-key="even" data-label="Even">Even</button>
-        <button class="bet-spot" data-bet-key="odd" data-label="Odd">Odd</button>
-      </div>
+
       <div class="bet-actions">
         <button id="undoBet">Undo Last Bet</button>
         <button id="clearBets">Clear Bets</button>
         <button id="spinButton">Spin</button>
       </div>
+
       <div class="stats-grid">
         <div><strong>Total on table:</strong> <span id="totalBet">0</span></div>
         <div><strong>Active bets:</strong> <span id="activeBets">0</span></div>
       </div>
+
       <ul id="betList"></ul>
     </section>
 

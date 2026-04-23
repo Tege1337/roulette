@@ -4,7 +4,19 @@ const INSURANCE_REFUND_PER_LEVEL = 0.1;
 const STIPEND_TOKENS_PER_LEVEL = 2;
 const UPGRADE_COST_MULTIPLIER = 1.5;
 const MAX_HISTORY_ITEMS = 20;
+const SPIN_TRANSITION_DURATION_MS = 4200;
+const SPIN_SAFETY_BUFFER_DURATION_MS = 300;
+const SPIN_FULL_ROTATIONS = 6;
+const EUROPEAN_ROULETTE_SEQUENCE = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 const redNumbers = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
+
+if (
+  EUROPEAN_ROULETTE_SEQUENCE.length !== ROULETTE_POCKETS ||
+  new Set(EUROPEAN_ROULETTE_SEQUENCE).size !== ROULETTE_POCKETS ||
+  EUROPEAN_ROULETTE_SEQUENCE.some((number) => number < 0 || number >= ROULETTE_POCKETS)
+) {
+  throw new Error("Invalid European roulette sequence: expected unique values 0-36.");
+}
 
 const state = {
   tokens: 100,
@@ -31,7 +43,8 @@ const state = {
   },
   bets: [],
   betActions: [],
-  spinning: false
+  spinning: false,
+  wheelRotation: 0
 };
 
 const elements = {
@@ -61,6 +74,7 @@ const elements = {
   clearBets: document.getElementById("clearBets"),
   result: document.getElementById("result"),
   wheel: document.getElementById("wheel"),
+  wheelTrack: document.getElementById("wheelTrack"),
   wheelNumber: document.getElementById("wheelNumber"),
   numberBoard: document.getElementById("numberBoard"),
   payoutLevel: document.getElementById("payoutLevel"),
@@ -77,24 +91,79 @@ const elements = {
   buyStipend: document.getElementById("buyStipend")
 };
 
-const boardBets = [];
-
-for (let n = 1; n <= 36; n += 1) {
-  const button = document.createElement("button");
-  button.className = `bet-spot ${redNumbers.has(n) ? "red" : "black"}`;
-  button.dataset.betKey = `number:${n}`;
-  button.dataset.label = String(n);
-  button.textContent = String(n);
-  elements.numberBoard.append(button);
+function getNumberColor(number) {
+  if (number === 0) return "green";
+  return redNumbers.has(number) ? "red" : "black";
 }
 
-document.querySelectorAll(".bet-spot").forEach((button) => {
-  boardBets.push(button);
-});
+function capitalize(word) {
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
 
-function addHistory(text) {
+function buildWheel() {
+  elements.wheelTrack.textContent = "";
+  const pocketAngle = 360 / EUROPEAN_ROULETTE_SEQUENCE.length;
+
+  EUROPEAN_ROULETTE_SEQUENCE.forEach((number, index) => {
+    const pocket = document.createElement("div");
+    const color = getNumberColor(number);
+    pocket.className = `wheel-pocket ${color}`;
+    pocket.dataset.number = String(number);
+    pocket.style.setProperty("--angle", `${index * pocketAngle}deg`);
+    pocket.textContent = String(number);
+    elements.wheelTrack.append(pocket);
+  });
+}
+
+function buildNumberBoard() {
+  elements.numberBoard.textContent = "";
+  for (let row = 1; row <= 12; row += 1) {
+    const high = row * 3;
+    const numbers = [high, high - 1, high - 2];
+    numbers.forEach((n) => {
+      const button = document.createElement("button");
+      button.className = `bet-spot ${redNumbers.has(n) ? "red" : "black"}`;
+      button.dataset.betKey = `number:${n}`;
+      button.dataset.label = String(n);
+      button.textContent = String(n);
+      elements.numberBoard.append(button);
+    });
+  }
+}
+
+buildNumberBoard();
+buildWheel();
+
+const boardBets = Array.from(document.querySelectorAll(".bet-spot"));
+
+function addHistory(entry) {
   const item = document.createElement("li");
-  item.textContent = text;
+
+  if (entry.type === "spin") {
+    const wrapper = document.createElement("div");
+    wrapper.className = "history-spin";
+
+    const resultPill = document.createElement("span");
+    resultPill.className = `history-pill ${entry.won ? "win" : "loss"}`;
+    resultPill.textContent = entry.won ? "Win" : "Loss";
+
+    const number = document.createElement("span");
+    number.className = `history-number ${entry.color}`;
+    number.textContent = `${entry.rolled} ${capitalize(entry.color)}`;
+
+    const table = document.createElement("span");
+    table.textContent = `Table ${entry.table}`;
+
+    const meta = document.createElement("span");
+    meta.className = "history-meta";
+    meta.textContent = `Net ${entry.net >= 0 ? `+${entry.net}` : entry.net} • Tokens ${entry.tokens}`;
+
+    wrapper.append(resultPill, number, table, meta);
+    item.append(wrapper);
+  } else {
+    item.textContent = entry.text;
+  }
+
   elements.history.prepend(item);
   while (elements.history.children.length > MAX_HISTORY_ITEMS) {
     elements.history.removeChild(elements.history.lastChild);
@@ -162,6 +231,23 @@ function renderBetList() {
     li.textContent = `${bet.label}: ${bet.amount}`;
     elements.betList.append(li);
   });
+}
+
+function setWinningPocket(number) {
+  elements.wheelTrack.querySelectorAll(".wheel-pocket.winner").forEach((pocket) => {
+    pocket.classList.remove("winner");
+  });
+
+  if (typeof number === "number") {
+    const winner = elements.wheelTrack.querySelector(`.wheel-pocket[data-number="${number}"]`);
+    if (winner) winner.classList.add("winner");
+  }
+}
+
+function updateWheelNumber(number) {
+  const color = getNumberColor(number);
+  elements.wheelNumber.textContent = String(number);
+  elements.wheelNumber.className = `wheel-number ${color}`;
 }
 
 function updateUI() {
@@ -267,22 +353,45 @@ function applyRollStats(rolled) {
   }
 }
 
+function normalizeAngle(angle) {
+  return ((angle % 360) + 360) % 360;
+}
+
 function animateRoll(finalNumber) {
   return new Promise((resolve) => {
-    let ticks = 0;
     state.spinning = true;
-    elements.wheel.classList.add("rolling");
-    const timer = setInterval(() => {
-      ticks += 1;
-      elements.wheelNumber.textContent = String(Math.floor(Math.random() * ROULETTE_POCKETS));
-      if (ticks >= 28) {
-        clearInterval(timer);
-        elements.wheel.classList.remove("rolling");
-        elements.wheelNumber.textContent = String(finalNumber);
-        state.spinning = false;
-        resolve();
-      }
-    }, 70);
+    setWinningPocket(null);
+
+    const pocketAngle = 360 / EUROPEAN_ROULETTE_SEQUENCE.length;
+    const index = EUROPEAN_ROULETTE_SEQUENCE.indexOf(finalNumber);
+    const desiredRotation = normalizeAngle(-index * pocketAngle);
+    const currentRotation = normalizeAngle(state.wheelRotation);
+
+    let delta = desiredRotation - currentRotation;
+    if (delta < 0) delta += 360;
+
+    state.wheelRotation += 360 * SPIN_FULL_ROTATIONS + delta;
+    elements.wheelTrack.style.transition = `transform ${SPIN_TRANSITION_DURATION_MS}ms cubic-bezier(0.12, 0.76, 0.16, 1)`;
+
+    requestAnimationFrame(() => {
+      elements.wheelTrack.style.transform = `rotate(${state.wheelRotation}deg)`;
+      updateWheelNumber(finalNumber);
+    });
+
+    const finalize = () => {
+      elements.wheelTrack.removeEventListener("transitionend", onTransitionEnd);
+      setWinningPocket(finalNumber);
+      state.spinning = false;
+      resolve();
+    };
+
+    const onTransitionEnd = () => {
+      clearTimeout(safetyTimeout);
+      finalize();
+    };
+
+    const safetyTimeout = setTimeout(finalize, SPIN_TRANSITION_DURATION_MS + SPIN_SAFETY_BUFFER_DURATION_MS);
+    elements.wheelTrack.addEventListener("transitionend", onTransitionEnd, { once: true });
   });
 }
 
@@ -341,22 +450,34 @@ async function spinRoulette() {
   state.netProfit = state.tokens - 100;
   if (netChange > state.biggestWin) state.biggestWin = netChange;
 
+  const color = getNumberColor(rolled);
+  const colorLabel = capitalize(color);
+
   if (wonAny) {
     state.wins += 1;
     state.currentStreak = state.currentStreak >= 0 ? state.currentStreak + 1 : 1;
     if (state.currentStreak > state.bestWinStreak) state.bestWinStreak = state.currentStreak;
-    elements.result.textContent = `Roulette: ${rolled}. Net gain: +${netChange}.`;
+    elements.result.textContent = `Roulette: ${rolled} (${colorLabel}). Net gain: +${netChange}.`;
     elements.result.className = "result-win";
   } else {
     state.losses += 1;
     state.currentStreak = state.currentStreak <= 0 ? state.currentStreak - 1 : -1;
     if (state.currentStreak < state.worstLosingStreak) state.worstLosingStreak = state.currentStreak;
-    elements.result.textContent = `Roulette: ${rolled}. Net change: ${netChange}.`;
+    elements.result.textContent = `Roulette: ${rolled} (${colorLabel}). Net change: ${netChange}.`;
     elements.result.className = "result-loss";
   }
 
   applyRollStats(rolled);
-  addHistory(`${wonAny ? "Win" : "Loss"} - rolled ${rolled}, table ${tableAmount}, net ${netChange}, tokens ${state.tokens}`);
+  addHistory({
+    type: "spin",
+    won: wonAny,
+    rolled,
+    color,
+    table: tableAmount,
+    net: netChange,
+    tokens: state.tokens
+  });
+
   clearBets();
 }
 
@@ -368,7 +489,7 @@ function buyUpgrade(type) {
   state.upgrades[type] += 1;
   state.costs[type] = Math.round(cost * UPGRADE_COST_MULTIPLIER);
 
-  addHistory(`Bought ${type} upgrade (level ${state.upgrades[type]}).`);
+  addHistory({ type: "text", text: `Bought ${type} upgrade (level ${state.upgrades[type]}).` });
   updateUI();
 }
 
@@ -388,4 +509,6 @@ elements.payoutPercentPerLevel.textContent = String(Math.round(PAYOUT_BOOST_PER_
 elements.insurancePercentPerLevel.textContent = String(Math.round(INSURANCE_REFUND_PER_LEVEL * 100));
 elements.stipendTokensPerLevel.textContent = String(STIPEND_TOKENS_PER_LEVEL);
 
+updateWheelNumber(0);
+setWinningPocket(0);
 updateUI();
