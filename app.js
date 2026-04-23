@@ -103,16 +103,24 @@ function capitalize(word) {
 function buildWheel() {
   elements.wheelTrack.textContent = "";
   const pocketAngle = 360 / EUROPEAN_ROULETTE_SEQUENCE.length;
+  const colorStops = [];
 
   EUROPEAN_ROULETTE_SEQUENCE.forEach((number, index) => {
+    const start = index * pocketAngle;
+    const end = (index + 1) * pocketAngle;
+    const pocketColor = getNumberColor(number);
+    const fill = pocketColor === "red" ? "#7f1d1d" : pocketColor === "black" ? "#020617" : "#14532d";
+    colorStops.push(`${fill} ${start}deg ${end}deg`);
+
     const pocket = document.createElement("div");
-    const color = getNumberColor(number);
-    pocket.className = `wheel-pocket ${color}`;
+    pocket.className = `wheel-pocket ${pocketColor}`;
     pocket.dataset.number = String(number);
     pocket.style.setProperty("--angle", `${index * pocketAngle}deg`);
     pocket.textContent = String(number);
     elements.wheelTrack.append(pocket);
   });
+
+  elements.wheelTrack.style.background = `conic-gradient(from 0deg, ${colorStops.join(",")})`;
 }
 
 function buildNumberBoard() {
