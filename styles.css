@@ -207,7 +207,7 @@ button:disabled {
 
 .inside-table {
   display: grid;
-  grid-template-columns: minmax(64px, 0.22fr) minmax(0, 1fr) minmax(96px, 0.3fr);
+  grid-template-columns: minmax(64px, auto) minmax(0, 1fr) minmax(96px, auto);
   gap: 8px;
   align-items: stretch;
 }
@@ -396,7 +396,7 @@ button:disabled {
   }
 
   .inside-table {
-    grid-template-columns: minmax(56px, 0.24fr) minmax(0, 1fr);
+    grid-template-columns: minmax(56px, auto) minmax(0, 1fr);
   }
 
   .column-bets {
