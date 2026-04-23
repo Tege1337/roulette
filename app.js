@@ -108,12 +108,12 @@ function buildWheel() {
   EUROPEAN_ROULETTE_SEQUENCE.forEach((number, index) => {
     const start = index * pocketAngle;
     const end = (index + 1) * pocketAngle;
-    const color = getNumberColor(number);
-    const fill = color === "red" ? "#7f1d1d" : color === "black" ? "#020617" : "#14532d";
+    const pocketColor = getNumberColor(number);
+    const fill = pocketColor === "red" ? "#7f1d1d" : pocketColor === "black" ? "#020617" : "#14532d";
     colorStops.push(`${fill} ${start}deg ${end}deg`);
 
     const pocket = document.createElement("div");
-    pocket.className = `wheel-pocket ${color}`;
+    pocket.className = `wheel-pocket ${pocketColor}`;
     pocket.dataset.number = String(number);
     pocket.style.setProperty("--angle", `${index * pocketAngle}deg`);
     pocket.textContent = String(number);
