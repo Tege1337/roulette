@@ -46,7 +46,17 @@
       <p id="spinBreakdown" class="muted"></p>
     </section>
 
-    <section class="card table-card">
+    <nav class="card menu-card" aria-label="Main menu">
+      <div class="main-menu">
+        <button class="menu-btn" data-view-button="play">Play</button>
+        <button class="menu-btn" data-view-button="progress">Progress</button>
+        <button class="menu-btn" data-view-button="upgrades">Upgrades</button>
+        <button class="menu-btn" data-view-button="shop">Shop</button>
+        <button class="menu-btn" data-view-button="history">History</button>
+      </div>
+    </nav>
+
+    <section class="card table-card view-panel" data-view-panel="play">
       <h2>Betting Table</h2>
       <div class="controls-grid">
         <div>
@@ -142,7 +152,7 @@
       <ul id="betList"></ul>
     </section>
 
-    <section class="card">
+    <section class="card view-panel" data-view-panel="progress">
       <h2>Goals & Progression</h2>
       <div class="stats-grid">
         <div><strong>Daily Streak:</strong> <span id="dailyStreak">0</span></div>
@@ -158,7 +168,7 @@
       <ul id="achievementList"></ul>
     </section>
 
-    <section class="card">
+    <section class="card view-panel" data-view-panel="upgrades">
       <h2>Upgrades (Branches)</h2>
       <div class="upgrade-list">
         <div class="upgrade-item">
@@ -182,7 +192,7 @@
       </div>
     </section>
 
-    <section class="card">
+    <section class="card view-panel" data-view-panel="shop">
       <h2>Cosmetics & Shop</h2>
       <p class="muted">Spend gems for cosmetic unlocks.</p>
       <div class="shop-grid">
@@ -205,7 +215,7 @@
       </select>
     </section>
 
-    <section class="card">
+    <section class="card view-panel" data-view-panel="history">
       <h2>Stats, History & Social</h2>
       <div class="stats-grid five">
         <div><strong>Total Spins:</strong> <span id="spins">0</span></div>
