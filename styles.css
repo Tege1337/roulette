@@ -82,10 +82,6 @@ body.celebrate::after {
   border-color: #1d4ed8;
 }
 
-.view-panel[hidden] {
-  display: none;
-}
-
 h1, h2, h3 { margin-top: 0; }
 
 label {

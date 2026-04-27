@@ -1,6 +1,6 @@
 const ROULETTE_POCKETS = 37;
 const MAX_HISTORY_ITEMS = 120;
-const DEFAULT_VIEW = "play";
+const DEFAULT_NAV_VIEW = "play";
 const SPIN_TRANSITION_DURATION_MS = 3200;
 const SPIN_FULL_ROTATIONS = 6;
 const UPGRADE_COST_MULTIPLIER = 1.45;
@@ -102,7 +102,7 @@ const DEFAULT_STATE = {
   powerChoice: "none",
   currentModifier: null,
   currentEvent: "standard",
-  currentView: DEFAULT_VIEW,
+  currentView: DEFAULT_NAV_VIEW,
   reducedMotion: false,
   colorblindMode: false,
 
@@ -941,11 +941,11 @@ function rotateEventIfNeeded() {
 
 function setCurrentView(view) {
   const validViews = new Set(elements.viewPanels.map((panel) => panel.dataset.viewPanel).filter(Boolean));
-  state.currentView = validViews.has(view) ? view : DEFAULT_VIEW;
+  state.currentView = validViews.has(view) ? view : DEFAULT_NAV_VIEW;
 }
 
 function renderCurrentView() {
-  const currentView = state.currentView || DEFAULT_VIEW;
+  const currentView = state.currentView || DEFAULT_NAV_VIEW;
   elements.viewPanels.forEach((panel) => {
     panel.hidden = panel.dataset.viewPanel !== currentView;
   });
