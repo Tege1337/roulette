@@ -17,13 +17,13 @@ A modernized browser roulette game with progression systems, game modes, challen
 
 ## Project structure
 
-- `/home/runner/work/roulette/roulette/index.html` – app markup and feature panels
-- `/home/runner/work/roulette/roulette/styles.css` – layout, themes, accessibility and responsive styling
-- `/home/runner/work/roulette/roulette/app.js` – game logic, progression, rewards, modes, social systems
+- `index.html` – app markup and feature panels
+- `styles.css` – layout, themes, accessibility and responsive styling
+- `app.js` – game logic, progression, rewards, modes, social systems
 
 ## How to run
 
-1. Open `/home/runner/work/roulette/roulette/index.html` in a browser.
+1. Open `index.html` in a browser.
 2. Set chip amount and place bets.
 3. Choose mode/power, optionally set challenge seed.
 4. Spin and progress through missions/challenges/achievements.
@@ -31,4 +31,4 @@ A modernized browser roulette game with progression systems, game modes, challen
 
 ## Validation performed
 
-- `node --check /home/runner/work/roulette/roulette/app.js`
+- `node --check app.js`

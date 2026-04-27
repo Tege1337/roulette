@@ -5,12 +5,22 @@ const SPIN_FULL_ROTATIONS = 6;
 const UPGRADE_COST_MULTIPLIER = 1.45;
 const SAVE_KEY = "roulette_plus_v2";
 const DAILY_DATE_KEY = new Date().toISOString().slice(0, 10);
-const WEEK_KEY = `${new Date().getUTCFullYear()}-W${Math.ceil((new Date().getUTCDate() + new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).getUTCDay()) / 7)}`;
+function getWeekKey(date = new Date()) {
+  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const day = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const week = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+}
+const WEEK_KEY = getWeekKey();
 
 const EUROPEAN_ROULETTE_SEQUENCE = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
 const redNumbers = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
 
-if (EUROPEAN_ROULETTE_SEQUENCE.length !== ROULETTE_POCKETS) throw new Error("Invalid roulette sequence");
+if (EUROPEAN_ROULETTE_SEQUENCE.length !== ROULETTE_POCKETS) {
+  throw new Error(`Invalid roulette sequence length: expected ${ROULETTE_POCKETS}, got ${EUROPEAN_ROULETTE_SEQUENCE.length}.`);
+}
 
 const MODE_CONFIG = {
   classic: { label: "Classic", payoutMultiplier: 1, insuranceMultiplier: 1, durationMultiplier: 1 },
@@ -183,12 +193,23 @@ function capitalize(word) {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
+function hasUnsafeOwnKeys(obj) {
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return false;
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === "__proto__" || key === "constructor" || key === "prototype") return true;
+    if (hasUnsafeOwnKeys(value)) return true;
+  }
+  return false;
+}
+
 function mergeDeep(base, patch) {
   if (!patch || typeof patch !== "object") return base;
   for (const [key, value] of Object.entries(patch)) {
-    if (value && typeof value === "object" && !Array.isArray(value) && key in base) {
+    if (key === "__proto__" || key === "constructor" || key === "prototype") continue;
+    if (hasUnsafeOwnKeys(value)) continue;
+    if (value && typeof value === "object" && !Array.isArray(value) && Object.hasOwn(base, key)) {
       base[key] = mergeDeep(base[key], value);
-    } else {
+    } else if (Object.hasOwn(base, key)) {
       base[key] = value;
     }
   }
@@ -379,6 +400,7 @@ function updateWeeklyReset() {
   state.weekly.weekKey = WEEK_KEY;
   state.weekly.completed = false;
   state.weekly.progress = { spins: 0, netPositiveSpins: 0 };
+  addHistoryText("Weekly challenges reset.");
 }
 
 function nextModifier() {
@@ -453,7 +475,7 @@ function animateRoll(finalNumber) {
   });
 }
 
-function deterministicRandom() {
+function getRandomValue() {
   if (!state.meta.challengeSeed) return Math.random();
   if (!state.meta.rngState) {
     let seed = 0;
@@ -661,7 +683,7 @@ async function spinRoulette() {
   state.tokens -= tableAmount;
   state.totalWagered += tableAmount;
 
-  const rolled = Math.floor(deterministicRandom() * ROULETTE_POCKETS);
+  const rolled = Math.floor(getRandomValue() * ROULETTE_POCKETS);
   await animateRoll(rolled);
 
   const mode = MODE_CONFIG[state.mode];
@@ -713,19 +735,13 @@ async function spinRoulette() {
 
   const stipendGain = Math.round((2 + state.upgrades.economy * 2) * ctx.stipendMultiplier) + ctx.stipendFlat;
 
-  state.tokens += grossPayout + insuranceRefund + stipendGain;
-
-  let netChange = state.tokens - tokensBeforeSpin;
+  const baseTokensAfterSpin = state.tokens + grossPayout + insuranceRefund + stipendGain;
+  let netChange = baseTokensAfterSpin - tokensBeforeSpin;
   if (useRisk) {
     state.riskTokens -= 1;
-    if (netChange >= 0) {
-      state.tokens += netChange;
-      netChange *= 2;
-    } else {
-      state.tokens += netChange;
-      netChange *= 2;
-    }
+    netChange *= 2;
   }
+  state.tokens = tokensBeforeSpin + netChange;
 
   state.spins += 1;
   state.netProfit = state.tokens - (100 + state.prestige * 10);
@@ -905,13 +921,12 @@ function prestigeReset() {
   }
 
   submitRun();
-  state.prestige += 1;
   const gained = 12 + state.prestige * 2;
+  state.prestige += 1;
   state.gems += gained;
   addHistoryText(`Prestige ${state.prestige} reached (+${gained} gems, permanent gain boost).`);
 
   resetRunKeepMeta();
-  state.tokens += state.prestige * 20;
   updateProgress();
 }
 
