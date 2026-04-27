@@ -1,4 +1,5 @@
 const MAX_ROULETTE_POCKETS = 38;
+const DOUBLE_ZERO_NUMBER = 37;
 const MAX_HISTORY_ITEMS = 120;
 const DEFAULT_NAV_VIEW = "play";
 const SPIN_TRANSITION_DURATION_MS = 3200;
@@ -17,7 +18,7 @@ function getWeekKey(date = new Date()) {
 const WEEK_KEY = getWeekKey();
 
 const EUROPEAN_ROULETTE_SEQUENCE = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
-const AMERICAN_ROULETTE_SEQUENCE = [0, 28, 9, 26, 30, 11, 7, 20, 32, 17, 5, 22, 34, 15, 3, 24, 36, 13, 1, 37, 27, 10, 25, 29, 12, 8, 19, 31, 18, 6, 21, 33, 16, 4, 23, 35, 14, 2];
+const AMERICAN_ROULETTE_SEQUENCE = [0, 28, 9, 26, 30, 11, 7, 20, 32, 17, 5, 22, 34, 15, 3, 24, 36, 13, 1, DOUBLE_ZERO_NUMBER, 27, 10, 25, 29, 12, 8, 19, 31, 18, 6, 21, 33, 16, 4, 23, 35, 14, 2];
 const FRENCH_CALL_BUNDLES = {
   voisins: [22, 18, 29, 7, 28, 12, 35, 3, 26, 0, 32, 15, 19, 4, 21, 2, 25],
   tiers: [27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33],
@@ -30,7 +31,8 @@ const TABLE_VARIANTS = {
 };
 const redNumbers = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
 const EVEN_MONEY_KEYS = new Set(["red", "black", "even", "odd", "low", "high"]);
-const AUTO_WARN = "Auto-bet can rapidly increase losses. Always use stop limits.";
+const AUTO_WARN = "Auto-betting can rapidly increase losses. Always use stop limits.";
+const CHART_BARS = " ▁▂▃▄▅▆▇█";
 
 const MODE_CONFIG = {
   classic: { label: "Classic", payoutMultiplier: 1, insuranceMultiplier: 1, durationMultiplier: 1 },
@@ -140,9 +142,10 @@ const DEFAULT_STATE = {
   savedPreset: [],
   strategyProfiles: { slot1: [], slot2: [], slot3: [] },
   autoBet: { enabled: false, system: "none", stopLoss: 150, takeProfit: 250, baseChip: 10, fibIndex: 0, dalembertStep: 0, lossStreak: 0 },
-  tournament: { enabled: false, seed: "", started: false, bankroll: 300 },
+  tournament: { enabled: false, seed: "", started: false, bankroll: 300, prevTokens: null },
   ghost: { targetNet: 0 },
   analytics: { simulation: null, historyFilter: "all", leaderboardCategory: "profit" },
+  enPrisonCredits: 0,
 
   missions: [],
   missionStats: {
@@ -283,7 +286,7 @@ function saveState() {
 }
 
 function getNumberColor(number) {
-  if (number === 0 || number === 37) return "green";
+  if (number === 0 || number === DOUBLE_ZERO_NUMBER) return "green";
   return redNumbers.has(number) ? "red" : "black";
 }
 
@@ -300,7 +303,7 @@ function currentPocketCount() {
 }
 
 function numberLabel(number) {
-  return number === 37 ? "00" : String(number);
+  return number === DOUBLE_ZERO_NUMBER ? "00" : String(number);
 }
 
 function houseEdgeText() {
@@ -624,7 +627,7 @@ function evaluateBet(key, rolled, spinWonAny) {
     const nums = key.split(":")[1].split(",").map((n) => Number(n));
     return nums.includes(rolled);
   }
-  if ((rolled === 0 || rolled === 37) && !key.startsWith("streak:")) return false;
+  if ((rolled === 0 || rolled === DOUBLE_ZERO_NUMBER) && !key.startsWith("streak:")) return false;
 
   if (key === "red") return redNumbers.has(rolled);
   if (key === "black") return !redNumbers.has(rolled);
@@ -653,7 +656,11 @@ function evaluateBet(key, rolled, spinWonAny) {
 }
 
 function parseNumbersInput(raw) {
-  return raw.split(",").map((n) => Number(n.trim())).filter((n) => Number.isInteger(n) && n >= 0 && n <= 37);
+  return raw.split(",").map((n) => Number(n.trim())).filter(isValidNumberForCurrentTable);
+}
+
+function isValidNumberForCurrentTable(n) {
+  return Number.isInteger(n) && n >= 0 && n <= DOUBLE_ZERO_NUMBER && (n !== DOUBLE_ZERO_NUMBER || currentTable().hasDoubleZero);
 }
 
 function addInsideBetFromBuilder() {
@@ -687,7 +694,7 @@ function addNeighborsBet() {
 
 function addFinaleBet() {
   const digit = Math.max(0, Math.min(9, Number(elements.finaleDigit.value) || 0));
-  const pool = currentSequence().filter((n) => n !== 37 && n % 10 === digit);
+  const pool = currentSequence().filter((n) => n !== DOUBLE_ZERO_NUMBER && n % 10 === digit);
   if (!pool.length) return;
   addBet(`finale:${pool.join(",")}`, `Finale ${digit}`);
 }
@@ -759,7 +766,7 @@ function setResult(text, positive, silent) {
 
 function applyRollStats(rolled) {
   state.rollCounts[rolled] += 1;
-  if (rolled !== 0 && rolled !== 37) {
+  if (rolled !== 0 && rolled !== DOUBLE_ZERO_NUMBER) {
     if (redNumbers.has(rolled)) state.colorStats.red += 1;
     else state.colorStats.black += 1;
     if (rolled % 2 === 0) state.colorStats.even += 1;
@@ -791,7 +798,7 @@ function applyMissionsAndChallenges({ wonAny, rolled, netChange }) {
   }
 
   if (!state.daily.completed) {
-    if (wonAny && !redNumbers.has(rolled) && rolled !== 0 && rolled !== 37) state.daily.progress.winOnBlack += 1;
+    if (wonAny && !redNumbers.has(rolled) && rolled !== 0 && rolled !== DOUBLE_ZERO_NUMBER) state.daily.progress.winOnBlack += 1;
     state.daily.progress.outsideBets += state.bets.filter((b) => ["red", "black", "even", "odd", "low", "high"].includes(b.key)).length;
     if (state.daily.progress.winOnBlack >= 3 && state.daily.progress.outsideBets >= 5) {
       state.daily.completed = true;
@@ -947,9 +954,15 @@ async function spinRoulette() {
       const profit = Math.round(bet.amount * ratio * profitMultiplier);
       grossPayout += bet.amount + profit;
     } else {
-      if (state.tableVariant === "french" && (rolled === 0) && EVEN_MONEY_KEYS.has(bet.key)) {
-        const rescue = state.frenchRule === "laPartage" ? Math.round(bet.amount / 2) : Math.round(bet.amount / 2);
-        grossPayout += rescue;
+      if (state.tableVariant === "french" && rolled === 0 && EVEN_MONEY_KEYS.has(bet.key)) {
+        if (state.frenchRule === "laPartage") {
+          const rescue = Math.round(bet.amount / 2);
+          grossPayout += rescue;
+        } else {
+          state.enPrisonCredits += bet.amount;
+          addHistoryText(`En Prison: ${bet.amount} held for next spin resolution.`);
+          continue;
+        }
       }
       losingStake += bet.amount;
     }
@@ -970,6 +983,18 @@ async function spinRoulette() {
     netChange *= 2;
   }
   state.tokens = tokensBeforeSpin + netChange;
+
+  if (state.tableVariant === "french" && state.frenchRule === "enPrison" && state.enPrisonCredits > 0 && rolled !== 0) {
+    const wonEvenMoney = state.bets.some((bet) => EVEN_MONEY_KEYS.has(bet.key) && evaluateBet(bet.key, rolled, wonAny));
+    if (wonEvenMoney) {
+      state.tokens += state.enPrisonCredits;
+      netChange += state.enPrisonCredits;
+      addHistoryText(`En Prison released: +${state.enPrisonCredits}.`);
+    } else {
+      addHistoryText(`En Prison forfeited: ${state.enPrisonCredits}.`);
+    }
+    state.enPrisonCredits = 0;
+  }
 
   state.spins += 1;
   state.netProfit = state.tokens - (100 + state.prestige * 10);
@@ -1551,7 +1576,7 @@ function renderDistributionAndAnalytics() {
   const sample = curve.slice(-60);
   const bars = sample.map((value) => {
     const h = Math.round(((value - min) / spread) * 8);
-    return " ▁▂▃▄▅▆▇█"[h];
+    return CHART_BARS[h];
   }).join("");
   elements.bankrollCurve.textContent = `Bankroll curve\n${bars}\nmin ${min} max ${max}`;
 }
@@ -1671,6 +1696,10 @@ function wireEvents() {
 
   elements.tableVariant.addEventListener("change", () => {
     state.tableVariant = elements.tableVariant.value;
+    if (!currentTable().hasDoubleZero) {
+      state.bets = state.bets.filter((bet) => !bet.key.includes(String(DOUBLE_ZERO_NUMBER)));
+      state.lastClearedBets = state.lastClearedBets.filter((bet) => !bet.key.includes(String(DOUBLE_ZERO_NUMBER)));
+    }
     buildWheel();
     buildNumberBoard();
     bindBetSpotEvents();
@@ -1759,12 +1788,20 @@ function wireEvents() {
   });
   elements.tournamentMode.addEventListener("change", () => {
     state.tournament.enabled = elements.tournamentMode.checked;
-    if (state.tournament.enabled && !state.tournament.started) {
-      state.tokens = state.tournament.bankroll;
-      state.meta.challengeSeed = state.tournament.seed || `official-${DAILY_DATE_KEY}`;
-      state.meta.rngState = 0;
-      state.tournament.started = true;
-      addHistoryText("Tournament mode started with fixed bankroll and seed.");
+    if (state.tournament.enabled) {
+      if (!state.tournament.started) {
+        state.tournament.prevTokens = state.tokens;
+        state.tokens = state.tournament.bankroll;
+        state.meta.challengeSeed = state.tournament.seed || `official-${DAILY_DATE_KEY}`;
+        state.meta.rngState = 0;
+        state.tournament.started = true;
+        addHistoryText("Tournament mode started with fixed bankroll and seed.");
+      }
+    } else if (state.tournament.started) {
+      if (Number.isFinite(state.tournament.prevTokens)) state.tokens = state.tournament.prevTokens;
+      state.tournament.started = false;
+      state.tournament.prevTokens = null;
+      addHistoryText("Tournament mode disabled; bankroll restored.");
     }
     updateProgress();
   });
