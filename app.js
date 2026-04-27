@@ -1,5 +1,5 @@
 const ROULETTE_POCKETS = 37;
-const MAX_HISTORY_ITEMS = 30;
+const MAX_HISTORY_ITEMS = 120;
 const SPIN_TRANSITION_DURATION_MS = 3200;
 const SPIN_FULL_ROTATIONS = 6;
 const UPGRADE_COST_MULTIPLIER = 1.45;
@@ -101,6 +101,7 @@ const DEFAULT_STATE = {
   powerChoice: "none",
   currentModifier: null,
   currentEvent: "standard",
+  currentView: "play",
   reducedMotion: false,
   colorblindMode: false,
 
@@ -180,7 +181,9 @@ const elements = {
 
   wheelTrack: byId("wheelTrack"), wheelNumber: byId("wheelNumber"), numberBoard: byId("numberBoard"),
 
-  tutorialDialog: byId("tutorialDialog"), openTutorial: byId("openTutorial"), closeTutorial: byId("closeTutorial")
+  tutorialDialog: byId("tutorialDialog"), openTutorial: byId("openTutorial"), closeTutorial: byId("closeTutorial"),
+  viewPanels: Array.from(document.querySelectorAll("[data-view-panel]")),
+  viewButtons: Array.from(document.querySelectorAll("[data-view-button]"))
 };
 
 let state = mergeDeep(structuredClone(DEFAULT_STATE), loadState());
@@ -935,6 +938,21 @@ function rotateEventIfNeeded() {
   state.currentEvent = day === 5 ? "fortune" : day === 2 ? "rush" : "standard";
 }
 
+function setCurrentView(view) {
+  const validViews = new Set(["play", "progress", "upgrades", "shop", "history"]);
+  state.currentView = validViews.has(view) ? view : "play";
+}
+
+function renderCurrentView() {
+  const currentView = state.currentView || "play";
+  elements.viewPanels.forEach((panel) => {
+    panel.hidden = panel.dataset.viewPanel !== currentView;
+  });
+  elements.viewButtons.forEach((button) => {
+    button.classList.toggle("active", button.dataset.viewButton === currentView);
+  });
+}
+
 function updateProgress() {
   const winRate = state.spins > 0 ? Math.round((state.wins / state.spins) * 100) : 0;
   const totalBet = totalBetAmount();
@@ -992,6 +1010,7 @@ function updateProgress() {
   elements.seedInput.value = state.meta.challengeSeed;
   elements.colorblindMode.checked = state.colorblindMode;
   elements.reducedMotion.checked = state.reducedMotion;
+  setCurrentView(state.currentView);
 
   renderBetList();
   renderMissions();
@@ -1002,6 +1021,7 @@ function updateProgress() {
   renderBetHighlights();
   updateCosmeticSelects();
   applyCosmeticClasses();
+  renderCurrentView();
 
   document.body.classList.toggle("colorblind", state.colorblindMode);
 
@@ -1174,8 +1194,15 @@ function wireEvents() {
 
   elements.chipAmount.addEventListener("input", updateProgress);
 
+  elements.viewButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setCurrentView(button.dataset.viewButton);
+      updateProgress();
+    });
+  });
+
   elements.openTutorial.addEventListener("click", () => {
-    elements.tutorialDialog.showModal();
+    if (!elements.tutorialDialog.open) elements.tutorialDialog.showModal();
     state.meta.tutorialSeen = true;
     updateProgress();
   });
@@ -1196,7 +1223,7 @@ function init() {
 
   if (!state.meta.tutorialSeen) {
     setTimeout(() => {
-      if (typeof elements.tutorialDialog.showModal === "function") elements.tutorialDialog.showModal();
+      if (typeof elements.tutorialDialog.showModal === "function" && !elements.tutorialDialog.open) elements.tutorialDialog.showModal();
       state.meta.tutorialSeen = true;
       updateProgress();
     }, 150);

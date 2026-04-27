@@ -60,6 +60,32 @@ body.celebrate::after {
   grid-column: span 2;
 }
 
+.menu-card {
+  grid-column: span 2;
+  padding: 12px;
+}
+
+.main-menu {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.menu-btn {
+  margin-top: 0;
+  background: linear-gradient(180deg, #1e293b, #0f172a);
+  border: 1px solid #475569;
+}
+
+.menu-btn.active {
+  background: linear-gradient(180deg, #2563eb, #1d4ed8);
+  border-color: #1d4ed8;
+}
+
+.view-panel[hidden] {
+  display: none;
+}
+
 h1, h2, h3 { margin-top: 0; }
 
 label {
@@ -444,6 +470,10 @@ body.trail-spark .bet-spot.has-bet {
 
   .hero-actions {
     grid-template-columns: 1fr;
+  }
+
+  .main-menu {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .bet-actions,
