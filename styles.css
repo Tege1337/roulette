@@ -13,9 +13,7 @@
   --roulette-radius: 130px;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -23,10 +21,24 @@ body {
   background: radial-gradient(circle at top, #1e293b 0%, #0f172a 45%, #020617 100%);
   color: var(--text);
   line-height: 1.4;
+  transition: background 0.2s ease;
+}
+
+body.celebrate::after {
+  content: "✨ BIG WIN ✨";
+  position: fixed;
+  inset: 24px auto auto 50%;
+  transform: translateX(-50%);
+  background: #facc15;
+  color: #1f2937;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 800;
+  z-index: 999;
 }
 
 .container {
-  max-width: 1320px;
+  max-width: 1380px;
   margin: 0 auto;
   padding: 24px 20px 30px;
   display: grid;
@@ -48,11 +60,7 @@ body {
   grid-column: span 2;
 }
 
-h1,
-h2,
-h3 {
-  margin-top: 0;
-}
+h1, h2, h3 { margin-top: 0; }
 
 label {
   display: block;
@@ -61,10 +69,10 @@ label {
 }
 
 input,
-button {
+button,
+select {
   margin-top: 6px;
   width: 100%;
-  box-sizing: border-box;
   background: var(--surface);
   color: var(--text);
   border: 1px solid #475569;
@@ -80,15 +88,23 @@ button {
   transition: transform 0.14s ease, filter 0.14s ease;
 }
 
-button:hover {
-  filter: brightness(1.08);
-  transform: translateY(-1px);
+button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+button:disabled { background: #334155; cursor: not-allowed; }
+
+.hero-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
 }
 
-button:disabled {
-  background: #334155;
-  cursor: not-allowed;
+.hero-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 8px;
 }
+
+.muted { color: var(--muted); }
 
 .roulette-stage {
   display: grid;
@@ -142,26 +158,13 @@ button:disabled {
   border-radius: 50%;
   box-shadow: 0 1px 3px rgba(2, 6, 23, 0.55);
   z-index: 2;
-  /* Rotate into position, move outward from center with negative Y, then counter-rotate to keep labels upright. */
   transform: rotate(var(--angle)) translateY(calc(-1 * var(--roulette-radius))) rotate(calc(-1 * var(--angle)));
 }
 
-.wheel-pocket.red {
-  background: radial-gradient(circle at 35% 30%, #ef4444, #991b1b 68%);
-}
-
-.wheel-pocket.black {
-  background: radial-gradient(circle at 35% 30%, #1f2937, #020617 68%);
-}
-
-.wheel-pocket.green {
-  background: radial-gradient(circle at 35% 30%, #22c55e, #14532d 68%);
-}
-
-.wheel-pocket.winner {
-  border-color: #fde68a;
-  box-shadow: 0 0 0 2px #facc15 inset, 0 0 18px rgba(250, 204, 21, 0.92);
-}
+.wheel-pocket.red { background: radial-gradient(circle at 35% 30%, #ef4444, #991b1b 68%); }
+.wheel-pocket.black { background: radial-gradient(circle at 35% 30%, #1f2937, #020617 68%); }
+.wheel-pocket.green { background: radial-gradient(circle at 35% 30%, #22c55e, #14532d 68%); }
+.wheel-pocket.winner { border-color: #fde68a; box-shadow: 0 0 0 2px #facc15 inset, 0 0 18px rgba(250, 204, 21, 0.92); }
 
 .wheel-center {
   position: absolute;
@@ -189,29 +192,33 @@ button:disabled {
   z-index: 5;
 }
 
-.wheel-number {
-  font-size: 42px;
-  font-weight: 900;
-  color: #f8fafc;
-}
-
-.wheel-number.red {
-  color: #f87171;
-}
-
-.wheel-number.black {
-  color: #e2e8f0;
-}
-
-.wheel-number.green {
-  color: #4ade80;
-}
+.wheel-number { font-size: 42px; font-weight: 900; color: #f8fafc; }
+.wheel-number.red { color: #f87171; }
+.wheel-number.black { color: #e2e8f0; }
+.wheel-number.green { color: #4ade80; }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(120px, 1fr));
   gap: 8px 10px;
   font-size: 14px;
+}
+
+.stats-grid.five {
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.quick-chips {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .table-wrapper {
@@ -230,11 +237,7 @@ button:disabled {
   align-items: stretch;
 }
 
-.zero-spot {
-  margin-top: 0;
-  min-height: 100%;
-  font-size: 22px;
-}
+.zero-spot { margin-top: 0; min-height: 100%; font-size: 22px; }
 
 .number-board {
   display: grid;
@@ -243,25 +246,17 @@ button:disabled {
   grid-auto-rows: minmax(44px, auto);
 }
 
-.column-bets {
-  display: grid;
-  gap: 6px;
-  grid-auto-rows: minmax(44px, auto);
-}
-
-.dozen-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  grid-auto-rows: minmax(44px, auto);
-}
-
+.column-bets,
+.dozen-row,
 .outside-row {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 6px;
   grid-auto-rows: minmax(44px, auto);
 }
+
+.column-bets { grid-template-columns: 1fr; }
+.dozen-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.outside-row { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 
 .bet-spot {
   margin-top: 0;
@@ -278,31 +273,16 @@ button:disabled {
   line-height: 1.2;
 }
 
-.bet-spot small {
-  color: #cbd5e1;
-  font-weight: 500;
-}
-
-.bet-spot.red {
-  background: #b91c1c;
-}
-
-.bet-spot.black {
-  background: #111827;
-}
-
-.bet-spot.green {
-  background: #166534;
-}
-
-.bet-spot.has-bet {
-  box-shadow: 0 0 0 2px #facc15 inset, 0 0 0 1px rgba(250, 204, 21, 0.4);
-}
+.bet-spot small { color: #cbd5e1; font-weight: 500; }
+.bet-spot.red { background: #b91c1c; }
+.bet-spot.black { background: #111827; }
+.bet-spot.green { background: #166534; }
+.bet-spot.has-bet { box-shadow: 0 0 0 2px #facc15 inset, 0 0 0 1px rgba(250, 204, 21, 0.4); }
 
 .bet-actions {
   margin-top: 10px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(90px, 1fr));
+  grid-template-columns: repeat(5, minmax(90px, 1fr));
   gap: 8px;
 }
 
@@ -315,18 +295,20 @@ button:disabled {
   border: 1px solid rgba(100, 116, 139, 0.4);
 }
 
-.result-win {
-  color: #4ade80;
+#spinBreakdown {
+  margin-top: 8px;
 }
 
-.result-loss {
-  color: #f87171;
-}
+.result-win { color: #4ade80; }
+.result-loss { color: #f87171; }
 
-.upgrade-list {
+.upgrade-list,
+.shop-grid {
   display: grid;
   gap: 10px;
 }
+
+.shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
 .upgrade-item {
   border: 1px solid #475569;
@@ -335,8 +317,19 @@ button:disabled {
   background: linear-gradient(180deg, rgba(11, 18, 32, 0.85), rgba(2, 6, 23, 0.95));
 }
 
+.social-actions {
+  margin: 10px 0;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 #betList,
-#history {
+#history,
+#leaderboardList,
+#missionList,
+#challengeList,
+#achievementList {
   list-style: none;
   margin: 10px 0 0;
   padding-left: 0;
@@ -345,7 +338,11 @@ button:disabled {
 }
 
 #betList li,
-#history li {
+#history li,
+#leaderboardList li,
+#missionList li,
+#challengeList li,
+#achievementList li {
   padding: 8px 10px;
   border: 1px solid #334155;
   border-radius: 8px;
@@ -353,64 +350,62 @@ button:disabled {
   margin-bottom: 6px;
 }
 
-.history-spin {
-  display: grid;
-  grid-template-columns: auto auto auto 1fr;
-  gap: 8px;
-  align-items: center;
-  font-size: 13px;
-}
-
-.history-pill {
-  border-radius: 999px;
-  padding: 2px 8px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.history-pill.win {
-  background: rgba(34, 197, 94, 0.2);
-  color: #4ade80;
-}
-
-.history-pill.loss {
-  background: rgba(239, 68, 68, 0.2);
-  color: #f87171;
-}
-
-.history-number {
-  font-weight: 800;
-}
-
-.history-number.red {
-  color: #f87171;
-}
-
-.history-number.black {
+dialog {
+  border: 1px solid #334155;
+  background: #0f172a;
   color: #e2e8f0;
+  border-radius: 12px;
+  max-width: 560px;
 }
 
-.history-number.green {
-  color: #4ade80;
+dialog::backdrop {
+  background: rgba(2, 6, 23, 0.75);
 }
 
-.history-meta {
-  color: var(--muted);
-  text-align: right;
+body.colorblind {
+  --red: #eab308;
+  --green: #22d3ee;
 }
 
-@media (max-width: 1080px) {
-  .container {
-    grid-template-columns: 1fr;
-  }
+body.colorblind .bet-spot.red { background: #a16207; }
+body.colorblind .bet-spot.green { background: #0e7490; }
+
+body.theme-neon {
+  background: radial-gradient(circle at top, #0f172a 0%, #0f0f2c 40%, #020617 100%);
+}
+
+body.theme-neon .card {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.25), 0 10px 30px rgba(124, 58, 237, 0.2);
+}
+
+body.theme-classic {
+  background: radial-gradient(circle at top, #283618 0%, #1b4332 35%, #081c15 100%);
+}
+
+body.wheel-gold .wheel {
+  border-color: #f59e0b;
+}
+
+body.trail-spark .bet-spot.has-bet {
+  box-shadow: 0 0 0 2px #facc15 inset, 0 0 18px rgba(250, 204, 21, 0.8);
+}
+
+@media (max-width: 1120px) {
+  .container { grid-template-columns: 1fr; }
 
   .hero-card,
   .table-card {
     grid-column: span 1;
   }
 
-  .stats-grid {
+  .stats-grid,
+  .stats-grid.five {
     grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+
+  .controls-grid {
+    grid-template-columns: 1fr;
   }
 
   .inside-table {
@@ -425,36 +420,35 @@ button:disabled {
   .outside-row {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .bet-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 720px) {
+  :root { --roulette-radius: 90px; }
+
   .wheel {
     width: 270px;
     height: 270px;
   }
 
-  :root {
-    --roulette-radius: 90px;
+  .wheel-center { inset: 96px; }
+  .wheel-number { font-size: 34px; }
+
+  .hero-row {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .wheel-center {
-    inset: 96px;
-  }
-
-  .wheel-number {
-    font-size: 34px;
-  }
-
-  .history-spin {
+  .hero-actions {
     grid-template-columns: 1fr;
-    justify-items: start;
   }
 
-  .history-meta {
-    text-align: left;
-  }
-
-  .bet-actions {
+  .bet-actions,
+  .social-actions,
+  .shop-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -465,17 +459,12 @@ button:disabled {
     gap: 12px;
   }
 
-  .card {
-    padding: 12px;
-  }
-
-  .inside-table {
-    gap: 6px;
-  }
+  .card { padding: 12px; }
 
   .table-wrapper,
   .dozen-row,
-  .outside-row {
+  .outside-row,
+  .inside-table {
     gap: 5px;
   }
 
@@ -483,5 +472,9 @@ button:disabled {
     padding: 8px 5px;
     font-size: 12px;
     min-height: 40px;
+  }
+
+  .quick-chips {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

@@ -3,13 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Roulette Simulator</title>
+  <title>Roulette Simulator+</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="container">
     <section class="card hero-card">
-      <h1>Roulette Simulator</h1>
+      <div class="hero-row">
+        <div>
+          <h1>Roulette Simulator+</h1>
+          <p id="eventBanner" class="muted">Event: Standard Session</p>
+        </div>
+        <div class="hero-actions">
+          <button id="openTutorial">Tutorial</button>
+          <button id="prestigeButton">Prestige Reset</button>
+        </div>
+      </div>
+
       <div class="roulette-stage">
         <div id="wheel" class="wheel">
           <div class="wheel-pointer" aria-hidden="true"></div>
@@ -19,23 +29,68 @@
           </div>
         </div>
       </div>
-      <div class="stats-grid">
+
+      <div class="stats-grid five">
         <div><strong>Tokens:</strong> <span id="tokens">100</span></div>
-        <div><strong>Total Spins:</strong> <span id="spins">0</span></div>
-        <div><strong>Wins:</strong> <span id="wins">0</span></div>
-        <div><strong>Losses:</strong> <span id="losses">0</span></div>
-        <div><strong>Win Rate:</strong> <span id="winRate">0%</span></div>
-        <div><strong>Net Profit:</strong> <span id="netProfit">0</span></div>
-        <div><strong>Total Wagered:</strong> <span id="totalWagered">0</span></div>
-        <div><strong>Biggest Win:</strong> <span id="biggestWin">0</span></div>
+        <div><strong>Gems:</strong> <span id="gems">0</span></div>
+        <div><strong>Risk Tokens:</strong> <span id="riskTokens">0</span></div>
+        <div><strong>Level:</strong> <span id="level">1</span></div>
+        <div><strong>XP:</strong> <span id="xp">0</span>/<span id="xpToNext">100</span></div>
+        <div><strong>Season Level:</strong> <span id="seasonLevel">1</span></div>
+        <div><strong>Season XP:</strong> <span id="seasonXp">0</span></div>
+        <div><strong>Prestige:</strong> <span id="prestige">0</span></div>
+        <div><strong>Current Modifier:</strong> <span id="activeModifier">None</span></div>
+        <div><strong>Current Event:</strong> <span id="activeEvent">Standard</span></div>
       </div>
       <p id="result">Place chips on the board and spin.</p>
+      <p id="spinBreakdown" class="muted"></p>
     </section>
 
     <section class="card table-card">
       <h2>Betting Table</h2>
-      <label for="chipAmount">Chip amount</label>
-      <input id="chipAmount" type="number" min="1" value="10" />
+      <div class="controls-grid">
+        <div>
+          <label for="chipAmount">Chip amount</label>
+          <input id="chipAmount" type="number" min="1" value="10" />
+          <div class="quick-chips">
+            <button class="chip-preset" data-chip="5">+5</button>
+            <button class="chip-preset" data-chip="10">+10</button>
+            <button class="chip-preset" data-chip="25">+25</button>
+            <button class="chip-preset" data-chip="50">+50</button>
+          </div>
+        </div>
+        <div>
+          <label for="modeSelect">Game mode</label>
+          <select id="modeSelect">
+            <option value="classic">Classic</option>
+            <option value="highRisk">High-Risk</option>
+            <option value="chaos">Chaos</option>
+            <option value="speed">Speed</option>
+          </select>
+
+          <label for="powerChoice">Pre-spin power</label>
+          <select id="powerChoice">
+            <option value="none">None</option>
+            <option value="focus">Focus (+payout, -stipend)</option>
+            <option value="shield">Shield (loss reduction)</option>
+            <option value="surge">Surge (+XP)</option>
+          </select>
+
+          <label for="seedInput">Challenge seed (optional)</label>
+          <input id="seedInput" type="text" placeholder="e.g. weekly-race-01" />
+        </div>
+        <div>
+          <label>
+            <input id="useRiskToken" type="checkbox" /> Use risk token (double swing)
+          </label>
+          <label>
+            <input id="colorblindMode" type="checkbox" /> Colorblind-safe palette
+          </label>
+          <label>
+            <input id="reducedMotion" type="checkbox" /> Reduced motion
+          </label>
+        </div>
+      </div>
 
       <div class="table-wrapper">
         <div class="inside-table">
@@ -62,11 +117,20 @@
           <button class="bet-spot" data-bet-key="odd" data-label="Odd">Odd</button>
           <button class="bet-spot" data-bet-key="high" data-label="19-36">19-36</button>
         </div>
+
+        <div class="outside-row">
+          <button class="bet-spot" data-bet-key="combo:redOdd" data-label="Red + Odd">Red + Odd</button>
+          <button class="bet-spot" data-bet-key="combo:blackEven" data-label="Black + Even">Black + Even</button>
+          <button class="bet-spot" data-bet-key="streak:win" data-label="Win Spin">Streak Win</button>
+          <button class="bet-spot" data-bet-key="streak:loss" data-label="Loss Spin">Streak Loss</button>
+        </div>
       </div>
 
       <div class="bet-actions">
         <button id="undoBet">Undo Last Bet</button>
         <button id="clearBets">Clear Bets</button>
+        <button id="savePreset">Save Preset</button>
+        <button id="loadPreset">Load Preset</button>
         <button id="spinButton">Spin</button>
       </div>
 
@@ -79,8 +143,78 @@
     </section>
 
     <section class="card">
-      <h2>Stats & History</h2>
+      <h2>Goals & Progression</h2>
       <div class="stats-grid">
+        <div><strong>Daily Streak:</strong> <span id="dailyStreak">0</span></div>
+        <div><strong>Milestone:</strong> <span id="nextMilestone">10 spins</span></div>
+        <div><strong>Missions Completed:</strong> <span id="missionsCompleted">0</span></div>
+        <div><strong>Achievements:</strong> <span id="achievementCount">0</span></div>
+      </div>
+      <h3>Session Missions</h3>
+      <ul id="missionList"></ul>
+      <h3>Daily/Weekly Challenges</h3>
+      <ul id="challengeList"></ul>
+      <h3>Achievements</h3>
+      <ul id="achievementList"></ul>
+    </section>
+
+    <section class="card">
+      <h2>Upgrades (Branches)</h2>
+      <div class="upgrade-list">
+        <div class="upgrade-item">
+          <strong>Offense</strong> (Level <span id="offenseLevel">0</span>)
+          <div>Improves payout multiplier</div>
+          <div>Cost: <span id="offenseCost">200</span></div>
+          <button id="buyOffense">Buy</button>
+        </div>
+        <div class="upgrade-item">
+          <strong>Economy</strong> (Level <span id="economyLevel">0</span>)
+          <div>Improves stipend + resource income</div>
+          <div>Cost: <span id="economyCost">180</span></div>
+          <button id="buyEconomy">Buy</button>
+        </div>
+        <div class="upgrade-item">
+          <strong>Safety</strong> (Level <span id="safetyLevel">0</span>)
+          <div>Improves insurance and downside protection</div>
+          <div>Cost: <span id="safetyCost">150</span></div>
+          <button id="buySafety">Buy</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Cosmetics & Shop</h2>
+      <p class="muted">Spend gems for cosmetic unlocks.</p>
+      <div class="shop-grid">
+        <button class="shop-item" data-item="theme:neon" data-cost="15">Neon Theme (15)</button>
+        <button class="shop-item" data-item="theme:classic" data-cost="12">Classic Theme (12)</button>
+        <button class="shop-item" data-item="wheel:gold" data-cost="20">Gold Wheel (20)</button>
+        <button class="shop-item" data-item="trail:spark" data-cost="10">Spark Trail (10)</button>
+      </div>
+      <label for="equippedTheme">Theme</label>
+      <select id="equippedTheme">
+        <option value="default">Default</option>
+      </select>
+      <label for="equippedWheel">Wheel Skin</label>
+      <select id="equippedWheel">
+        <option value="default">Default</option>
+      </select>
+      <label for="equippedTrail">Chip Trail</label>
+      <select id="equippedTrail">
+        <option value="default">Default</option>
+      </select>
+    </section>
+
+    <section class="card">
+      <h2>Stats, History & Social</h2>
+      <div class="stats-grid five">
+        <div><strong>Total Spins:</strong> <span id="spins">0</span></div>
+        <div><strong>Wins:</strong> <span id="wins">0</span></div>
+        <div><strong>Losses:</strong> <span id="losses">0</span></div>
+        <div><strong>Win Rate:</strong> <span id="winRate">0%</span></div>
+        <div><strong>Net Profit:</strong> <span id="netProfit">0</span></div>
+        <div><strong>Total Wagered:</strong> <span id="totalWagered">0</span></div>
+        <div><strong>Biggest Win:</strong> <span id="biggestWin">0</span></div>
         <div><strong>Current Streak:</strong> <span id="currentStreak">0</span></div>
         <div><strong>Best Win Streak:</strong> <span id="bestWinStreak">0</span></div>
         <div><strong>Worst Losing Streak:</strong> <span id="worstLosingStreak">0</span></div>
@@ -90,34 +224,31 @@
         <div><strong>Even Rolls:</strong> <span id="evenRolls">0</span></div>
         <div><strong>Odd Rolls:</strong> <span id="oddRolls">0</span></div>
       </div>
+
+      <div class="social-actions">
+        <button id="submitRun">Submit Run to Local Leaderboard</button>
+        <button id="shareSummary">Share Run Summary</button>
+      </div>
+
+      <h3>Local Leaderboard</h3>
+      <ul id="leaderboardList"></ul>
+
       <h3>Recent Spins</h3>
       <ul id="history"></ul>
     </section>
-
-    <section class="card">
-      <h2>Upgrades</h2>
-      <div class="upgrade-list">
-        <div class="upgrade-item">
-          <strong>Payout Boost</strong> (Level <span id="payoutLevel">0</span>)
-          <div>+<span id="payoutPercentPerLevel">10</span>% payout per level</div>
-          <div>Cost: <span id="payoutCost">200</span> tokens</div>
-          <button id="buyPayout">Buy</button>
-        </div>
-        <div class="upgrade-item">
-          <strong>Insurance</strong> (Level <span id="insuranceLevel">0</span>)
-          <div>Refund <span id="insurancePercentPerLevel">10</span>% of losing bets per level</div>
-          <div>Cost: <span id="insuranceCost">150</span> tokens</div>
-          <button id="buyInsurance">Buy</button>
-        </div>
-        <div class="upgrade-item">
-          <strong>Spin Stipend</strong> (Level <span id="stipendLevel">0</span>)
-          <div>Gain +<span id="stipendTokensPerLevel">2</span> tokens per level after every spin</div>
-          <div>Cost: <span id="stipendCost">180</span> tokens</div>
-          <button id="buyStipend">Buy</button>
-        </div>
-      </div>
-    </section>
   </div>
+
+  <dialog id="tutorialDialog">
+    <h2>Quick Tutorial</h2>
+    <ol>
+      <li>Pick chip amount and place bets.</li>
+      <li>Choose mode and optional power.</li>
+      <li>Spin to complete missions/challenges and gain rewards.</li>
+      <li>Use upgrades, cosmetics, and prestige to scale long-term.</li>
+    </ol>
+    <button id="closeTutorial">Got it</button>
+  </dialog>
+
   <script src="app.js"></script>
 </body>
 </html>
