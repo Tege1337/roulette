@@ -1,5 +1,6 @@
 const ROULETTE_POCKETS = 37;
 const MAX_HISTORY_ITEMS = 120;
+const DEFAULT_VIEW = "play";
 const SPIN_TRANSITION_DURATION_MS = 3200;
 const SPIN_FULL_ROTATIONS = 6;
 const UPGRADE_COST_MULTIPLIER = 1.45;
@@ -101,7 +102,7 @@ const DEFAULT_STATE = {
   powerChoice: "none",
   currentModifier: null,
   currentEvent: "standard",
-  currentView: "play",
+  currentView: DEFAULT_VIEW,
   reducedMotion: false,
   colorblindMode: false,
 
@@ -939,12 +940,12 @@ function rotateEventIfNeeded() {
 }
 
 function setCurrentView(view) {
-  const validViews = new Set(["play", "progress", "upgrades", "shop", "history"]);
-  state.currentView = validViews.has(view) ? view : "play";
+  const validViews = new Set(elements.viewPanels.map((panel) => panel.dataset.viewPanel).filter(Boolean));
+  state.currentView = validViews.has(view) ? view : DEFAULT_VIEW;
 }
 
 function renderCurrentView() {
-  const currentView = state.currentView || "play";
+  const currentView = state.currentView || DEFAULT_VIEW;
   elements.viewPanels.forEach((panel) => {
     panel.hidden = panel.dataset.viewPanel !== currentView;
   });
