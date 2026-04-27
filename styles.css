@@ -67,7 +67,7 @@ body.celebrate::after {
 
 .main-menu {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -304,7 +304,7 @@ button:disabled { background: #334155; cursor: not-allowed; }
 .bet-actions {
   margin-top: 10px;
   display: grid;
-  grid-template-columns: repeat(5, minmax(90px, 1fr));
+  grid-template-columns: repeat(7, minmax(90px, 1fr));
   gap: 8px;
 }
 
@@ -343,7 +343,19 @@ button:disabled { background: #334155; cursor: not-allowed; }
   margin: 10px 0;
   display: grid;
   gap: 8px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.chart-box {
+  margin-top: 10px;
+  background: rgba(2, 6, 23, 0.5);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 10px;
+  max-height: 220px;
+  overflow: auto;
+  white-space: pre;
+  line-height: 1.2;
 }
 
 #betList,
@@ -403,6 +415,28 @@ body.theme-neon .card {
 
 body.theme-classic {
   background: radial-gradient(circle at top, #283618 0%, #1b4332 35%, #081c15 100%);
+}
+
+body.high-contrast {
+  --panel: #000;
+  --panel-border: #fff;
+  --surface: #000;
+  --surface-soft: #000;
+  --text: #fff;
+  --muted: #d1d5db;
+  --accent: #00e5ff;
+}
+
+body.high-contrast .card,
+body.high-contrast #result,
+body.high-contrast .upgrade-item,
+body.high-contrast #betList li,
+body.high-contrast #history li,
+body.high-contrast #leaderboardList li,
+body.high-contrast #missionList li,
+body.high-contrast #challengeList li,
+body.high-contrast #achievementList li {
+  border-color: #fff;
 }
 
 body.wheel-gold .wheel {
