@@ -53,6 +53,7 @@
         <button class="menu-btn" data-view-button="upgrades">Upgrades</button>
         <button class="menu-btn" data-view-button="shop">Shop</button>
         <button class="menu-btn" data-view-button="history">History</button>
+        <button class="menu-btn" data-view-button="analysis">Analytics</button>
       </div>
     </nav>
 
@@ -70,6 +71,28 @@
           </div>
         </div>
         <div>
+          <label for="tableVariant">Table variant</label>
+          <select id="tableVariant">
+            <option value="european">European (single 0)</option>
+            <option value="french">French (La Partage/En Prison)</option>
+            <option value="american">American (0/00)</option>
+          </select>
+
+          <label for="frenchRule">French even-money rule</label>
+          <select id="frenchRule">
+            <option value="laPartage">La Partage</option>
+            <option value="enPrison">En Prison</option>
+          </select>
+
+          <label for="tableMin">Table min</label>
+          <input id="tableMin" type="number" min="1" value="5" />
+
+          <label for="tableMax">Table max</label>
+          <input id="tableMax" type="number" min="5" value="500" />
+
+          <label for="noMoreBetsMs">No more bets window (ms)</label>
+          <input id="noMoreBetsMs" type="number" min="0" step="100" value="1200" />
+
           <label for="modeSelect">Game mode</label>
           <select id="modeSelect">
             <option value="classic">Classic</option>
@@ -90,8 +113,22 @@
           <input id="seedInput" type="text" placeholder="e.g. weekly-race-01" />
         </div>
         <div>
+          <label for="dealerSpeed">Dealer speed</label>
+          <select id="dealerSpeed">
+            <option value="slow">Slow</option>
+            <option value="normal" selected>Normal</option>
+            <option value="fast">Fast</option>
+          </select>
+          <label for="ballReleaseMs">Ball release delay (ms)</label>
+          <input id="ballReleaseMs" type="number" min="0" step="50" value="250" />
+          <label>
+            <input id="dealerSignature" type="checkbox" /> Dealer signature (flavor variance)
+          </label>
           <label>
             <input id="useRiskToken" type="checkbox" /> Use risk token (double swing)
+          </label>
+          <label>
+            <input id="highContrastMode" type="checkbox" /> High contrast mode
           </label>
           <label>
             <input id="colorblindMode" type="checkbox" /> Colorblind-safe palette
@@ -99,12 +136,82 @@
           <label>
             <input id="reducedMotion" type="checkbox" /> Reduced motion
           </label>
+          <label for="onboardingPath">Onboarding path</label>
+          <select id="onboardingPath">
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="controls-grid">
+        <div>
+          <h3>Advanced bet builder</h3>
+          <label for="insideBetType">Inside bet type</label>
+          <select id="insideBetType">
+            <option value="split">Split</option>
+            <option value="street">Street</option>
+            <option value="corner">Corner</option>
+            <option value="sixline">Six line</option>
+          </select>
+          <label for="insideBetNumbers">Numbers (comma-separated)</label>
+          <input id="insideBetNumbers" type="text" placeholder="e.g. 1,2 or 1,2,4,5" />
+          <button id="addInsideBet">Add inside bet</button>
+        </div>
+        <div>
+          <h3>Call bets</h3>
+          <label for="neighborNumber">Neighbors around number</label>
+          <input id="neighborNumber" type="number" min="0" max="36" value="17" />
+          <label for="neighborSpan">Span each side</label>
+          <input id="neighborSpan" type="number" min="1" max="4" value="2" />
+          <button id="addNeighbors">Add neighbors</button>
+          <label for="finaleDigit">Finale digit (0-9)</label>
+          <input id="finaleDigit" type="number" min="0" max="9" value="7" />
+          <button id="addFinale">Add finale</button>
+          <label for="callBundle">Call bundle</label>
+          <select id="callBundle">
+            <option value="voisins">Voisins du Zero</option>
+            <option value="tiers">Tiers du Cylindre</option>
+            <option value="orphelins">Orphelins</option>
+          </select>
+          <button id="addCallBundle">Add call bundle</button>
+        </div>
+        <div>
+          <h3>Strategy & auto-bet</h3>
+          <label for="strategySlot">Strategy slot</label>
+          <select id="strategySlot">
+            <option value="slot1">Slot 1</option>
+            <option value="slot2">Slot 2</option>
+            <option value="slot3">Slot 3</option>
+          </select>
+          <div class="quick-chips">
+            <button id="saveStrategy">Save Slot</button>
+            <button id="loadStrategy">Load Slot</button>
+            <button id="rerollMissions">Reroll Missions</button>
+            <button id="rebet">Rebet</button>
+          </div>
+          <label for="autoBetSystem">Auto-bet system</label>
+          <select id="autoBetSystem">
+            <option value="none">None</option>
+            <option value="martingale">Martingale</option>
+            <option value="fibonacci">Fibonacci</option>
+            <option value="dalembert">D'Alembert</option>
+          </select>
+          <label for="autoBetStopLoss">Auto stop-loss</label>
+          <input id="autoBetStopLoss" type="number" min="0" value="150" />
+          <label for="autoBetTakeProfit">Auto take-profit</label>
+          <input id="autoBetTakeProfit" type="number" min="0" value="250" />
+          <label>
+            <input id="autoBetEnabled" type="checkbox" /> Enable auto-bet (risk warning)
+          </label>
         </div>
       </div>
 
       <div class="table-wrapper">
         <div class="inside-table">
           <button class="bet-spot green zero-spot" data-bet-key="number:0" data-label="0">0</button>
+          <button class="bet-spot green zero-spot" id="doubleZeroSpot" data-bet-key="number:37" data-label="00" hidden>00</button>
           <div id="numberBoard" class="number-board"></div>
           <div class="column-bets">
             <button class="bet-spot" data-bet-key="column:1" data-label="Column 1">2 to 1<br><small>Column 1</small></button>
@@ -141,15 +248,20 @@
         <button id="clearBets">Clear Bets</button>
         <button id="savePreset">Save Preset</button>
         <button id="loadPreset">Load Preset</button>
+        <button id="halveBets">Halve Bets</button>
+        <button id="doubleBets">Double Bets</button>
         <button id="spinButton">Spin</button>
       </div>
 
       <div class="stats-grid">
         <div><strong>Total on table:</strong> <span id="totalBet">0</span></div>
         <div><strong>Active bets:</strong> <span id="activeBets">0</span></div>
+        <div><strong>House edge:</strong> <span id="houseEdge">2.70%</span></div>
+        <div><strong>No-more-bets:</strong> <span id="noMoreBetsStatus">Open</span></div>
       </div>
 
       <ul id="betList"></ul>
+      <p id="hintText" class="muted" aria-live="polite"></p>
     </section>
 
     <section class="card view-panel" data-view-panel="progress">
@@ -217,6 +329,34 @@
 
     <section class="card view-panel" data-view-panel="history">
       <h2>Stats, History & Social</h2>
+      <div class="controls-grid">
+        <div>
+          <label for="historyFilter">History filter</label>
+          <select id="historyFilter">
+            <option value="all">All</option>
+            <option value="25">Last 25</option>
+            <option value="50">Last 50</option>
+            <option value="100">Last 100</option>
+          </select>
+        </div>
+        <div>
+          <label for="leaderboardCategory">Leaderboard category</label>
+          <select id="leaderboardCategory">
+            <option value="profit">Profit</option>
+            <option value="consistency">Consistency</option>
+            <option value="streak">Streak</option>
+            <option value="drawdown">Lowest Drawdown</option>
+          </select>
+        </div>
+        <div>
+          <label>
+            <input id="tournamentMode" type="checkbox" /> Tournament mode (fixed bankroll + seed)
+          </label>
+          <label for="tournamentSeed">Tournament seed</label>
+          <input id="tournamentSeed" type="text" placeholder="daily-official-seed" />
+        </div>
+      </div>
+
       <div class="stats-grid five">
         <div><strong>Total Spins:</strong> <span id="spins">0</span></div>
         <div><strong>Wins:</strong> <span id="wins">0</span></div>
@@ -238,6 +378,8 @@
       <div class="social-actions">
         <button id="submitRun">Submit Run to Local Leaderboard</button>
         <button id="shareSummary">Share Run Summary</button>
+        <button id="shareReplay">Share Replay Link</button>
+        <button id="setGhostTarget">Set Ghost Target</button>
       </div>
 
       <h3>Local Leaderboard</h3>
@@ -245,6 +387,39 @@
 
       <h3>Recent Spins</h3>
       <ul id="history"></ul>
+      <h3>Distribution / Hot-Cold</h3>
+      <p id="distributionSummary" class="muted"></p>
+      <p id="ghostSummary" class="muted"></p>
+    </section>
+
+    <section class="card view-panel" data-view-panel="analysis">
+      <h2>Analytics & Simulation</h2>
+      <div class="controls-grid">
+        <div>
+          <div><strong>Estimated EV / spin:</strong> <span id="evPerSpin">0</span></div>
+          <div><strong>Volatility:</strong> <span id="volatility">0</span></div>
+          <div><strong>Max Drawdown:</strong> <span id="drawdown">0</span></div>
+          <div><strong>Best mode:</strong> <span id="bestMode">-</span></div>
+        </div>
+        <div>
+          <label for="simSpins">Simulation spins</label>
+          <input id="simSpins" type="number" min="10" max="5000" step="10" value="500" />
+          <button id="runSimulation">Run Simulation</button>
+          <p id="simulationResult" class="muted"></p>
+        </div>
+        <div>
+          <label for="seedBrowser">Seed browser</label>
+          <select id="seedBrowser">
+            <option value="">-- Select Seed --</option>
+            <option value="official-daily">Official Daily</option>
+            <option value="community-speedrun-1">Community Speedrun #1</option>
+            <option value="community-voisins-master">Community Voisins Master</option>
+          </select>
+          <button id="applySeedBrowser">Apply Seed</button>
+          <p class="muted">Use fixed seeds to compare fair outcomes.</p>
+        </div>
+      </div>
+      <pre id="bankrollCurve" class="chart-box"></pre>
     </section>
   </div>
 
