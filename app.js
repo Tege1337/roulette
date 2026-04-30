@@ -412,17 +412,20 @@ function buildWheel() {
 
 function buildNumberBoard() {
   elements.numberBoard.textContent = "";
-  for (let row = 1; row <= 12; row += 1) {
-    const high = row * 3;
-    const numbers = [high, high - 1, high - 2];
-    numbers.forEach((n) => {
+  // Standard casino layout: 12 columns × 3 rows
+  // Top row: 3,6,9,...,36  (col % 3 === 0)
+  // Mid row: 2,5,8,...,35
+  // Bot row: 1,4,7,...,34
+  for (let rowOffset = 0; rowOffset < 3; rowOffset += 1) {
+    for (let col = 0; col < 12; col += 1) {
+      const n = col * 3 + (3 - rowOffset); // rowOffset 0→top row (3,6,...), 1→mid (2,5,...), 2→bot (1,4,...)
       const button = document.createElement("button");
       button.className = `bet-spot ${redNumbers.has(n) ? "red" : "black"}`;
       button.dataset.betKey = `number:${n}`;
       button.dataset.label = String(n);
       button.textContent = String(n);
       elements.numberBoard.append(button);
-    });
+    }
   }
   if (elements.doubleZeroSpot) {
     const showDoubleZero = currentTable().hasDoubleZero;

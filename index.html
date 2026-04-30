@@ -60,7 +60,8 @@
     <section class="card table-card view-panel" data-view-panel="play">
       <h2>Betting Table</h2>
       <div class="controls-grid">
-        <div>
+        <fieldset class="settings-group">
+          <legend>Chips &amp; Limits</legend>
           <label for="chipAmount">Chip amount</label>
           <input id="chipAmount" type="number" min="1" value="10" />
           <div class="quick-chips">
@@ -69,30 +70,24 @@
             <button class="chip-preset" data-chip="25">+25</button>
             <button class="chip-preset" data-chip="50">+50</button>
           </div>
-        </div>
-        <div>
-          <label for="tableVariant">Table variant</label>
+          <label for="tableMin">Table min</label>
+          <input id="tableMin" type="number" min="1" value="5" />
+          <label for="tableMax">Table max</label>
+          <input id="tableMax" type="number" min="5" value="500" />
+        </fieldset>
+        <fieldset class="settings-group">
+          <legend>Table Rules</legend>
+          <label for="tableVariant">Variant</label>
           <select id="tableVariant">
             <option value="european">European (single 0)</option>
             <option value="french">French (La Partage/En Prison)</option>
             <option value="american">American (0/00)</option>
           </select>
-
           <label for="frenchRule">French even-money rule</label>
           <select id="frenchRule">
             <option value="laPartage">La Partage</option>
             <option value="enPrison">En Prison</option>
           </select>
-
-          <label for="tableMin">Table min</label>
-          <input id="tableMin" type="number" min="1" value="5" />
-
-          <label for="tableMax">Table max</label>
-          <input id="tableMax" type="number" min="5" value="500" />
-
-          <label for="noMoreBetsMs">No more bets window (ms)</label>
-          <input id="noMoreBetsMs" type="number" min="0" step="100" value="1200" />
-
           <label for="modeSelect">Game mode</label>
           <select id="modeSelect">
             <option value="classic">Classic</option>
@@ -100,7 +95,6 @@
             <option value="chaos">Chaos</option>
             <option value="speed">Speed</option>
           </select>
-
           <label for="powerChoice">Pre-spin power</label>
           <select id="powerChoice">
             <option value="none">None</option>
@@ -108,46 +102,40 @@
             <option value="shield">Shield (loss reduction)</option>
             <option value="surge">Surge (+XP)</option>
           </select>
-
-          <label for="seedInput">Challenge seed (optional)</label>
-          <input id="seedInput" type="text" placeholder="e.g. weekly-race-01" />
-        </div>
-        <div>
+        </fieldset>
+        <fieldset class="settings-group">
+          <legend>Dealer &amp; Display</legend>
           <label for="dealerSpeed">Dealer speed</label>
           <select id="dealerSpeed">
             <option value="slow">Slow</option>
             <option value="normal" selected>Normal</option>
             <option value="fast">Fast</option>
           </select>
+          <label for="noMoreBetsMs">No more bets window (ms)</label>
+          <input id="noMoreBetsMs" type="number" min="0" step="100" value="1200" />
           <label for="ballReleaseMs">Ball release delay (ms)</label>
           <input id="ballReleaseMs" type="number" min="0" step="50" value="250" />
-          <label>
-            <input id="dealerSignature" type="checkbox" /> Dealer signature (flavor variance)
-          </label>
-          <label>
-            <input id="useRiskToken" type="checkbox" /> Use risk token (double swing)
-          </label>
-          <label>
-            <input id="highContrastMode" type="checkbox" /> High contrast mode
-          </label>
-          <label>
-            <input id="colorblindMode" type="checkbox" /> Colorblind-safe palette
-          </label>
-          <label>
-            <input id="reducedMotion" type="checkbox" /> Reduced motion
-          </label>
+          <label for="seedInput">Challenge seed (optional)</label>
+          <input id="seedInput" type="text" placeholder="e.g. weekly-race-01" />
+          <div class="checkbox-group">
+            <label><input id="dealerSignature" type="checkbox" /> Dealer signature</label>
+            <label><input id="useRiskToken" type="checkbox" /> Use risk token</label>
+            <label><input id="highContrastMode" type="checkbox" /> High contrast</label>
+            <label><input id="colorblindMode" type="checkbox" /> Colorblind palette</label>
+            <label><input id="reducedMotion" type="checkbox" /> Reduced motion</label>
+          </div>
           <label for="onboardingPath">Onboarding path</label>
           <select id="onboardingPath">
             <option value="beginner">Beginner</option>
             <option value="intermediate">Intermediate</option>
             <option value="advanced">Advanced</option>
           </select>
-        </div>
+        </fieldset>
       </div>
 
       <div class="controls-grid">
-        <div>
-          <h3>Advanced bet builder</h3>
+        <fieldset class="settings-group">
+          <legend>Advanced Bet Builder</legend>
           <label for="insideBetType">Inside bet type</label>
           <select id="insideBetType">
             <option value="split">Split</option>
@@ -158,9 +146,9 @@
           <label for="insideBetNumbers">Numbers (comma-separated)</label>
           <input id="insideBetNumbers" type="text" placeholder="e.g. 1,2 or 1,2,4,5" />
           <button id="addInsideBet">Add inside bet</button>
-        </div>
-        <div>
-          <h3>Call bets</h3>
+        </fieldset>
+        <fieldset class="settings-group">
+          <legend>Call Bets</legend>
           <label for="neighborNumber">Neighbors around number</label>
           <input id="neighborNumber" type="number" min="0" max="36" value="17" />
           <label for="neighborSpan">Span each side</label>
@@ -176,9 +164,9 @@
             <option value="orphelins">Orphelins</option>
           </select>
           <button id="addCallBundle">Add call bundle</button>
-        </div>
-        <div>
-          <h3>Strategy & auto-bet</h3>
+        </fieldset>
+        <fieldset class="settings-group">
+          <legend>Strategy &amp; Auto-Bet</legend>
           <label for="strategySlot">Strategy slot</label>
           <select id="strategySlot">
             <option value="slot1">Slot 1</option>
@@ -202,21 +190,21 @@
           <input id="autoBetStopLoss" type="number" min="0" value="150" />
           <label for="autoBetTakeProfit">Auto take-profit</label>
           <input id="autoBetTakeProfit" type="number" min="0" value="250" />
-          <label>
-            <input id="autoBetEnabled" type="checkbox" /> Enable auto-bet (risk warning)
-          </label>
-        </div>
+          <label><input id="autoBetEnabled" type="checkbox" /> Enable auto-bet (risk warning)</label>
+        </fieldset>
       </div>
 
       <div class="table-wrapper">
         <div class="inside-table">
-          <button class="bet-spot green zero-spot" data-bet-key="number:0" data-label="0">0</button>
-          <button class="bet-spot green zero-spot" id="doubleZeroSpot" data-bet-key="number:37" data-label="00" hidden>00</button>
+          <div class="zero-column">
+            <button class="bet-spot green zero-spot" data-bet-key="number:0" data-label="0">0</button>
+            <button class="bet-spot green zero-spot" id="doubleZeroSpot" data-bet-key="number:37" data-label="00" hidden>00</button>
+          </div>
           <div id="numberBoard" class="number-board"></div>
           <div class="column-bets">
-            <button class="bet-spot" data-bet-key="column:1" data-label="Column 1">2 to 1<br><small>Column 1</small></button>
-            <button class="bet-spot" data-bet-key="column:2" data-label="Column 2">2 to 1<br><small>Column 2</small></button>
-            <button class="bet-spot" data-bet-key="column:3" data-label="Column 3">2 to 1<br><small>Column 3</small></button>
+            <button class="bet-spot" data-bet-key="column:3" data-label="Column 3">2 to 1<br><small>Col 3</small></button>
+            <button class="bet-spot" data-bet-key="column:2" data-label="Column 2">2 to 1<br><small>Col 2</small></button>
+            <button class="bet-spot" data-bet-key="column:1" data-label="Column 1">2 to 1<br><small>Col 1</small></button>
           </div>
         </div>
 
@@ -235,11 +223,12 @@
           <button class="bet-spot" data-bet-key="high" data-label="19-36">19-36</button>
         </div>
 
-        <div class="outside-row">
-          <button class="bet-spot" data-bet-key="combo:redOdd" data-label="Red + Odd">Red + Odd</button>
-          <button class="bet-spot" data-bet-key="combo:blackEven" data-label="Black + Even">Black + Even</button>
-          <button class="bet-spot" data-bet-key="streak:win" data-label="Win Spin">Streak Win</button>
-          <button class="bet-spot" data-bet-key="streak:loss" data-label="Loss Spin">Streak Loss</button>
+        <div class="special-bets-row">
+          <span class="special-bets-label">Special</span>
+          <button class="bet-spot special" data-bet-key="combo:redOdd" data-label="Red &amp; Odd">Red &amp; Odd</button>
+          <button class="bet-spot special" data-bet-key="combo:blackEven" data-label="Black &amp; Even">Black &amp; Even</button>
+          <button class="bet-spot special" data-bet-key="streak:win" data-label="Win Spin">Streak Win</button>
+          <button class="bet-spot special" data-bet-key="streak:loss" data-label="Loss Spin">Streak Loss</button>
         </div>
       </div>
 

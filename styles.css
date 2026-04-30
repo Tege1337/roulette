@@ -237,6 +237,46 @@ button:disabled { background: #334155; cursor: not-allowed; }
   margin-bottom: 10px;
 }
 
+.settings-group {
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 10px 12px 12px;
+  background: rgba(11, 18, 32, 0.6);
+  margin: 0;
+}
+
+.settings-group legend {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #7dd3fc;
+  padding: 0 6px;
+}
+
+.checkbox-group {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 8px;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 0;
+  cursor: pointer;
+}
+
+.checkbox-group label input[type="checkbox"] {
+  width: auto;
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
 .quick-chips {
   display: grid;
   gap: 6px;
@@ -244,48 +284,78 @@ button:disabled { background: #334155; cursor: not-allowed; }
 }
 
 .table-wrapper {
-  margin-top: 10px;
+  margin-top: 14px;
   display: grid;
-  gap: 8px;
+  gap: 5px;
   overflow-x: auto;
   overflow-y: hidden;
-  padding-bottom: 2px;
+  padding: 14px;
+  background: radial-gradient(ellipse at center, #14532d 0%, #0d3d20 50%, #052e16 100%);
+  border: 2px solid #166534;
+  border-radius: 12px;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5);
 }
 
 .inside-table {
   display: grid;
-  grid-template-columns: minmax(64px, auto) minmax(0, 1fr) minmax(96px, auto);
-  gap: 8px;
+  grid-template-columns: minmax(44px, 52px) 1fr minmax(76px, 88px);
+  gap: 5px;
   align-items: stretch;
 }
 
-.zero-spot { margin-top: 0; min-height: 100%; font-size: 22px; }
+.zero-column {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.zero-spot { margin-top: 0; font-size: 18px; font-weight: 900; flex: 1; }
 
 .number-board {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  grid-auto-rows: minmax(44px, auto);
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(42px, auto));
+  gap: 4px;
 }
 
 .column-bets,
 .dozen-row,
 .outside-row {
   display: grid;
-  gap: 6px;
-  grid-auto-rows: minmax(44px, auto);
+  gap: 5px;
 }
 
-.column-bets { grid-template-columns: 1fr; }
+.column-bets {
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(3, 1fr);
+}
+
 .dozen-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .outside-row { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 
+.special-bets-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.special-bets-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  padding: 0 4px;
+}
+
 .bet-spot {
   margin-top: 0;
-  padding: 10px 7px;
-  font-size: 13px;
+  padding: 6px 4px;
+  font-size: 12px;
+  font-weight: 700;
   border: 1px solid rgba(148, 163, 184, 0.35);
-  min-height: 42px;
+  min-height: 40px;
   background: linear-gradient(180deg, #1e3a8a, #1e40af);
   display: flex;
   flex-direction: column;
@@ -293,13 +363,21 @@ button:disabled { background: #334155; cursor: not-allowed; }
   align-items: center;
   text-align: center;
   line-height: 1.2;
+  transition: filter 0.12s ease, transform 0.12s ease;
 }
+
+.bet-spot:hover { filter: brightness(1.15); transform: translateY(-1px); }
 
 .bet-spot small { color: #cbd5e1; font-weight: 500; }
 .bet-spot.red { background: #b91c1c; }
 .bet-spot.black { background: #111827; }
 .bet-spot.green { background: #166534; }
 .bet-spot.has-bet { box-shadow: 0 0 0 2px #facc15 inset, 0 0 0 1px rgba(250, 204, 21, 0.4); }
+.bet-spot.special {
+  background: linear-gradient(180deg, #1e3a5f, #162d4a);
+  border-color: rgba(100, 116, 139, 0.5);
+  flex: 1;
+}
 
 .bet-actions {
   margin-top: 10px;
@@ -430,6 +508,8 @@ body.high-contrast {
 body.high-contrast .card,
 body.high-contrast #result,
 body.high-contrast .upgrade-item,
+body.high-contrast .settings-group,
+body.high-contrast .table-wrapper,
 body.high-contrast #betList li,
 body.high-contrast #history li,
 body.high-contrast #leaderboardList li,
@@ -462,15 +542,6 @@ body.trail-spark .bet-spot.has-bet {
 
   .controls-grid {
     grid-template-columns: 1fr;
-  }
-
-  .inside-table {
-    grid-template-columns: minmax(56px, auto) minmax(0, 1fr);
-  }
-
-  .column-bets {
-    grid-column: span 2;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .outside-row {
@@ -511,6 +582,10 @@ body.trail-spark .bet-spot.has-bet {
   .shop-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .special-bets-row {
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 480px) {
@@ -521,20 +596,29 @@ body.trail-spark .bet-spot.has-bet {
 
   .card { padding: 12px; }
 
-  .table-wrapper,
+  .table-wrapper {
+    padding: 8px;
+    gap: 4px;
+  }
+
+  .number-board,
   .dozen-row,
   .outside-row,
   .inside-table {
-    gap: 5px;
+    gap: 3px;
   }
 
   .bet-spot {
-    padding: 8px 5px;
-    font-size: 12px;
-    min-height: 40px;
+    padding: 4px 2px;
+    font-size: 10px;
+    min-height: 34px;
   }
 
   .quick-chips {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .checkbox-group {
+    grid-template-columns: 1fr;
   }
 }
