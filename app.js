@@ -146,6 +146,7 @@ const DEFAULT_STATE = {
   ghost: { targetNet: 0 },
   analytics: { simulation: null, historyFilter: "all", leaderboardCategory: "profit" },
   enPrisonCredits: 0,
+  enPrisonBetKeys: [],
 
   missions: [],
   missionStats: {
@@ -960,6 +961,7 @@ async function spinRoulette() {
           grossPayout += rescue;
         } else {
           state.enPrisonCredits += bet.amount;
+          state.enPrisonBetKeys.push(bet.key);
           addHistoryText(`En Prison: ${bet.amount} held for next spin resolution.`);
           continue;
         }
@@ -985,7 +987,7 @@ async function spinRoulette() {
   state.tokens = tokensBeforeSpin + netChange;
 
   if (state.tableVariant === "french" && state.frenchRule === "enPrison" && state.enPrisonCredits > 0 && rolled !== 0) {
-    const wonEvenMoney = state.bets.some((bet) => EVEN_MONEY_KEYS.has(bet.key) && evaluateBet(bet.key, rolled, wonAny));
+    const wonEvenMoney = state.enPrisonBetKeys.some((key) => evaluateBet(key, rolled, wonAny));
     if (wonEvenMoney) {
       state.tokens += state.enPrisonCredits;
       netChange += state.enPrisonCredits;
@@ -994,6 +996,7 @@ async function spinRoulette() {
       addHistoryText(`En Prison forfeited: ${state.enPrisonCredits}.`);
     }
     state.enPrisonCredits = 0;
+    state.enPrisonBetKeys = [];
   }
 
   state.spins += 1;
@@ -1697,8 +1700,13 @@ function wireEvents() {
   elements.tableVariant.addEventListener("change", () => {
     state.tableVariant = elements.tableVariant.value;
     if (!currentTable().hasDoubleZero) {
-      state.bets = state.bets.filter((bet) => !bet.key.includes(String(DOUBLE_ZERO_NUMBER)));
-      state.lastClearedBets = state.lastClearedBets.filter((bet) => !bet.key.includes(String(DOUBLE_ZERO_NUMBER)));
+      const hasDoubleZero = (bet) => {
+        if (!bet.key.includes(":")) return false;
+        const nums = bet.key.split(":")[1].split(",").map(Number);
+        return nums.includes(DOUBLE_ZERO_NUMBER);
+      };
+      state.bets = state.bets.filter((bet) => !hasDoubleZero(bet));
+      state.lastClearedBets = state.lastClearedBets.filter((bet) => !hasDoubleZero(bet));
     }
     buildWheel();
     buildNumberBoard();
@@ -1798,7 +1806,7 @@ function wireEvents() {
         addHistoryText("Tournament mode started with fixed bankroll and seed.");
       }
     } else if (state.tournament.started) {
-      if (Number.isFinite(state.tournament.prevTokens)) state.tokens = state.tournament.prevTokens;
+      if (state.tournament.prevTokens !== null) state.tokens = state.tournament.prevTokens;
       state.tournament.started = false;
       state.tournament.prevTokens = null;
       addHistoryText("Tournament mode disabled; bankroll restored.");
